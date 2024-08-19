@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { logout, removeToken } from "./api/authApi";
 
@@ -29,22 +29,24 @@ const TopBar = () => {
     }
   };
 
-  const handleHome = () =>{
+  const handleHome = () => {
     navigate("/");
-  }
+  };
 
   return (
-    <div className="sticky top-0 backdrop-blur-md z-[50] flex justify-between items-center px-8 py-3 border-b border-zinc-500">
-      <p className="text-xl font-extrabold">OTRS</p>
+    <div className="sticky top-0 bg-muted z-[50] flex justify-between items-center px-8 py-3 border-b">
+      <Link className="text-xl font-extrabold" to="/">
+        OTRS
+      </Link>
 
       <div className="flex gap-4 items-center">
-        <Button className=" hover:bg-amber-700" variant="outline" size="icon">
-          <Home onClick={handleHome}className="h-4 w-4 cursor-pointer" />
+        <Button variant="outline" size="icon">
+          <Home onClick={handleHome} className="h-4 w-4 cursor-pointer" />
         </Button>
         <ModeToggle />
         <Popover>
           <PopoverTrigger asChild>
-            <Button className="hover:bg-red-700" variant="outline" size="icon">
+            <Button variant="outline" size="icon">
               <LogOut className="h-4 w-4 cursor-pointer " />
             </Button>
           </PopoverTrigger>

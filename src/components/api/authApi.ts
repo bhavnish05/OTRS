@@ -1,5 +1,5 @@
 import { OTPValidate } from "@/lib/types";
-import axios, { Axios, AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 
 export const getToken = (): string => {
   return localStorage.getItem("token") || "";
@@ -22,8 +22,6 @@ export const loginAPI = (data: {
   username: string;
   password: string;
 }): Promise<AxiosResponse> => {
-  console.log("triggered");
-
   const token = btoa(`${data.username}:${data.password}`);
 
   return axios.post(

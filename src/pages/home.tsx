@@ -1,5 +1,8 @@
+import { useState } from "react";
 
- 
+import CreateNewTicket from "@/components/dialog/createNewTicket";
+
+import { PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,199 +16,36 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
- 
-  DialogFooter
-} from "@/components/ui/dialog"
-import { useNavigate } from "react-router-dom";
+
 import KPI from "@/components/kpi";
-import App from "@/tanStack/tableTanStack";
-import { useState } from "react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { createTicket } from "@/components/api/createTicketApi";
- 
+import App from "@/components/tableTanStack";
+
 const Home = () => {
-  const navigate = useNavigate();
-  const [newTicketDialogOpen, setNewTicketDialogOpen] = useState(false);
-  
-  const [ticketData, setTicketData] = useState({
- 
-    ticketType: "SR",
-    severity: "",
-    ticketData: {
-      title: "",
-      description: "",
-    },
-    remarks: "",
-    // attachments: []
-  });
- 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { id, value } = e.target;
- 
-    if (id === "title" || id === "description") {
-      setTicketData(prevState => ({
-        ...prevState,
-        ticketData: {
-          ...prevState.ticketData,
-          [id]: value
-        }
-      }));
-    } else {
-      setTicketData(prevState => ({
-        ...prevState,
-        [id]: value,
-      }));
-    }
-  };
- 
- 
- 
-  const handleCreateTicket = async () => {
-    console.log("Sending ticket data:", ticketData);
- 
-    try {
-      const response = await createTicket(ticketData);
-      console.log("Ticket created successfully",response.data);
-  
-      alert("Ticket created successfully:");
-      setNewTicketDialogOpen(false);
-    } catch (error) {
-      console.error("Error creating ticket:", error);
-    }
-  };
- 
- 
+  const [createNewTicketDialogState, setCreateNewTicketDialogState] =
+    useState<boolean>(false);
+
   return (
-    <div>
+    <div className="flex flex-col gap-4">
       <KPI />
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
         <Button
-          className="mr-5 p-5 h-6 w-6 bg-blue-700 rounded-full"
+          className="flex gap-2 items-center"
           variant="outline"
-          onClick={() => setNewTicketDialogOpen(true)}
+          onClick={() =>
+            setCreateNewTicketDialogState(!createNewTicketDialogState)
+          }
         >
-          +
+          <p>Create </p>
+          <PlusCircle className="h-4 w-4" />
         </Button>
-        {newTicketDialogOpen && (
-          <Dialog open={newTicketDialogOpen} onOpenChange={setNewTicketDialogOpen}>
-            <DialogContent >
-              <DialogHeader>
-                <DialogTitle>Add New Ticket</DialogTitle>
-                <DialogDescription>Fill in the details to create a new ticket</DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-2">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="tickettype" className="text-left">
-                    Ticket Type
-                  </Label>
- 
-                  <Select>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="SR">Service Request</SelectItem>
-                      <SelectItem value="issue">Issue</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
- 
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="severity" className="text-left">
-                    Severity
-                  </Label>
-                  <Select onValueChange={handleInputChange}>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="severity" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="S1">S1</SelectItem>
-                      <SelectItem value="S2">S2</SelectItem>
-                      <SelectItem value="S3">S3</SelectItem>
- 
-                    </SelectContent>
-                  </Select>
-                </div>
- 
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="title" className="text-left">
-                    Title
-                  </Label>
-                  <Input id="title" type="text"
-                    value={ticketData.ticketData.title}
-                    onChange={handleInputChange}
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="description" className="text-left">
-                    Description
-                  </Label>
-                  <Input
-                    id="description"
-                    type="text"
-                    value={ticketData.ticketData.description}
-                    className="col-span-3"
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="remarks" className="text-left">
-                    Remarks
-                  </Label>
-                  <Input id="remarks" type="text"
-                    value={ticketData.remarks}
-                    className="col-span-3"
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="Accesstype" className="text-left">
-                    Assign Type
-                  </Label>
-                  <Select>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="severity" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="group">Group</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="Accesstype" className="text-left">
-                    Assign To
-                  </Label>
-                  <Select>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="severity" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user-list">User-list</SelectItem>
-                      <SelectItem value="group-list">Group-list</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
- 
-              <DialogFooter>
-                <SheetClose asChild>
-                  <Button type="submit" onClick={handleCreateTicket} >
-                    Create Ticket
-                  </Button>
-                </SheetClose>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+
+        <CreateNewTicket
+          dialogState={createNewTicketDialogState}
+          setDialogState={() =>
+            setCreateNewTicketDialogState(!createNewTicketDialogState)
+          }
+        />
+
         <Sheet>
           <SheetTrigger asChild>
             <Button className=" mr-5 p-5 bg-violet-700" variant="outline">
@@ -329,7 +169,7 @@ const Home = () => {
                 />
               </div>
             </div>
- 
+
             <SheetFooter>
               <SheetClose asChild>
                 <Button type="submit">Apply</Button>
@@ -338,15 +178,12 @@ const Home = () => {
           </SheetContent>
         </Sheet>
       </div>
- 
-      <div className="mt-2">
-   
 
+      <div className="mt-2">
         <App />
       </div>
     </div>
   );
 };
- 
+
 export default Home;
- 

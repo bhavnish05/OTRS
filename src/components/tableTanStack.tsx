@@ -22,7 +22,7 @@ import { getTickets } from "@/components/api/dashboardApi";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { removeToken } from "@/components/api/authApi";
-import { pickupApi } from "@/components/api/pickupApi";
+import { pickupTicket } from "@/components/api/ticketsApi";
 
 export type DensityState = "sm" | "md" | "lg";
 export interface DensityTableState {
@@ -258,7 +258,7 @@ function App() {
     console.log("clicked");
 
     try {
-      const response = await pickupApi(id);
+      const response = await pickupTicket(id);
 
       setPickupStatus((prev) => ({ ...prev, [id]: response.data.msg }));
       setClicked((prev) => ({ ...prev, [id]: true })); // update clicked state to indicate the ticket was picked up
@@ -367,7 +367,10 @@ function App() {
             <tbody>
               {table.getRowModel().rows.map((row) => {
                 return (
-                  <tr className="hover:bg-violet-600 whitespace-nowrap" key={row.id}>
+                  <tr
+                    className="hover:bg-violet-600 whitespace-nowrap"
+                    key={row.id}
+                  >
                     {row.getVisibleCells().map((cell) => {
                       return (
                         <td
@@ -376,8 +379,7 @@ function App() {
                             textAlign: "center",
                             fontSize: "13px",
                             fontWeight: "normal",
-                            
-                            
+
                             padding:
                               density === "sm"
                                 ? "4px"

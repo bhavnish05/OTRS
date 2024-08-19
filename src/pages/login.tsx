@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "react-router-dom";
+
+import { getToken, loginAPI } from "@/components/api/authApi";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,10 +15,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { getToken, loginAPI } from "@/components/api/authApi";
 import { useToast } from "@/components/ui/use-toast";
-import InputOTPForm from "./InputOtpForm";
-import { useNavigate } from "react-router-dom";
+import InputOTPForm from "@/components/inputOtpForm";
 
 const Login = () => {
   const { toast } = useToast();
@@ -43,8 +44,6 @@ const Login = () => {
     try {
       const response = await loginAPI(values);
       setUsername(values.username);
-      console.log(response);
-      
       setId(response.data.uniqueId);
       setOtpValidate(true);
       toast({
@@ -52,7 +51,6 @@ const Login = () => {
         description: "Login successful",
       });
     } catch (error: any) {
-      console.log(error);
       toast({
         title: "Authentication",
         description: "",
@@ -62,7 +60,6 @@ const Login = () => {
   };
 
   useEffect(() => {
-    
     if (getToken()) navigate("/");
   }, []);
 
@@ -70,7 +67,6 @@ const Login = () => {
     <div className="h-full">
       {otpValidate ? (
         <InputOTPForm id={id} userName={username} />
-        
       ) : (
         <div className="flex justify-center items-center h-screen w-screen">
           <div className="w-1/2 sm:w-2/5 lg:w-1/4">
@@ -110,10 +106,6 @@ const Login = () => {
                   )}
                 />
                 <Button type="submit">Login</Button>
-
-                <div className="flex items-center justify-center gap-1">
-                  <p className="text-muted-foreground text-xs">Made with ❤️</p>
-                </div>
               </form>
             </Form>
           </div>
