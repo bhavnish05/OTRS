@@ -48,12 +48,12 @@ const Login = () => {
       setOtpValidate(true);
       toast({
         title: "Authentication",
-        description: "Login successful",
+        description: "OTP has been sent.",
       });
     } catch (error: any) {
       toast({
         title: "Authentication",
-        description: "",
+        description: "Something went wrong. Please try again later!",
         variant: "destructive",
       });
     }

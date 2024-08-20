@@ -1,38 +1,18 @@
-import axios, { AxiosResponse } from "axios";
-import { getToken } from "./authApi";
+import { AxiosResponse } from "axios";
+import axiosInstance from "@/lib/axiosInstance";
 
 export const getTicketDetails = async (id: any): Promise<AxiosResponse> => {
-  return axios.post(
-    `http://10.101.104.140:8090/ticket_details/${id}`,
-    {},
-    {
-      headers: {
-        Authorization: getToken(),
-      },
-    }
-  );
+  return axiosInstance.post(`/ticket_details/${id}`, {});
 };
 
 export const createTicket = async (
   ticketData: object
 ): Promise<AxiosResponse> => {
-  return axios.post("http://10.101.104.140:8090/create_ticket", ticketData, {
-    headers: {
-      Authorization: getToken(),
-    },
-  });
+  return axiosInstance.post("/create_ticket", ticketData);
 };
 
 export const closeTicket = async (id: string): Promise<AxiosResponse> => {
-  return axios.post(
-    `http://10.101.104.140:8090/close_ticket/${id}`,
-    {},
-    {
-      headers: {
-        Authorization: getToken(),
-      },
-    }
-  );
+  return axiosInstance.post(`/close_ticket/${id}`, {});
 };
 
 export const submitResolution = async (
@@ -41,28 +21,15 @@ export const submitResolution = async (
   title: string,
   description: string
 ) => {
-  return axios.post(
-    `http://10.101.104.140:8090/submit_resolution/${ticket_id}`,
-    { description, fileNames: files, title },
-    {
-      headers: {
-        Authorization: getToken(),
-        Accept: "application/json",
-      },
-    }
-  );
+  return axiosInstance.post(`/submit_resolution/${ticket_id}`, {
+    description,
+    fileNames: files,
+    title,
+  });
 };
 
 export const pickupTicket = async (id: string): Promise<AxiosResponse> => {
-  return axios.post(
-    `http://10.101.104.140:8090/ticket_pickup/${id}`,
-    {},
-    {
-      headers: {
-        Authorization: getToken(),
-      },
-    }
-  );
+  return axiosInstance.post(`/ticket_pickup/${id}`, {});
 };
 
 export const assignTicket = async (
@@ -72,27 +39,16 @@ export const assignTicket = async (
   ticketId: number,
   id: string
 ): Promise<AxiosResponse> => {
-  return axios.post(
-    `http://10.101.104.140:8090/assign_ticket/${id}`,
-    { assignType, assignToGroup, assignToUser, ticketId },
-    {
-      headers: {
-        Authorization: getToken(),
-      },
-    }
-  );
+  return axiosInstance.post(`/assign_ticket/${id}`, {
+    assignType,
+    assignToGroup,
+    assignToUser,
+    ticketId,
+  });
 };
 
 export const downloadDocument = async (
   document_name: string
 ): Promise<AxiosResponse> => {
-  return axios.post(
-    `http://10.101.104.140:8090/download_document/${document_name}`,
-    {},
-    {
-      headers: {
-        Authorization: getToken(),
-      },
-    }
-  );
+  return axiosInstance.post(`/download_document/${document_name}`, {});
 };

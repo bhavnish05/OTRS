@@ -1,14 +1,6 @@
-import axios, { AxiosResponse } from "axios";
-import { getToken } from "./authApi";
+import { AxiosResponse } from "axios";
+import axiosInstance from "@/lib/axiosInstance";
 
 export const getTickets = async (): Promise<AxiosResponse> => {
-  return axios.post(
-    "http://10.101.104.140:8090/dashboard",
-    {},
-    {
-      headers: {
-        Authorization: getToken(),
-      },
-    }
-  );
+  return axiosInstance.post("/dashboard", {});
 };

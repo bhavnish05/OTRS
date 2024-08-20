@@ -3,24 +3,32 @@ import { File, PencilLine, Plus, XCircle } from "lucide-react";
 import { downloadDocument, submitResolution } from "./api/ticketsApi";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { uploadApi } from "./api/uploadApi";
+import { useToast } from "./ui/use-toast";
 
 interface ResolutionTabProps {
   ticketDetails: TicketDetails;
 }
 
 const ResolutionTab: React.FC<ResolutionTabProps> = ({ ticketDetails }) => {
+  const { toast } = useToast();
+
   const [resolution, setResolution] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
+  const [isPending, startTransition] = useTransition();
+
   const handleDownloadDocument = async (file_name: string) => {
     try {
-      const response = await downloadDocument(file_name);
-      console.log(response.data);
+      await downloadDocument(file_name);
     } catch (error) {
-      console.log(error);
+      toast({
+        title: "Document Download",
+        description: "Failed to download the document.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -30,33 +38,53 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({ ticketDetails }) => {
   };
 
   const handleUpload = async () => {
-    if (resolution === "" && file === null) {
-      alert("Enter Resolution or File");
-    } else {
-      if (file) {
-        try {
-          const response = await uploadApi(file);
-          setUploadedFiles([...uploadedFiles, response.data.new_filename]);
-          setFile(null);
-        } catch (error) {
-          console.log(error);
-        }
-      }
+    if (file === null) {
+      toast({
+        title: "Document Upload",
+        description: "Please select a file before uploading.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await uploadApi(file);
+      startTransition(() => {
+        setUploadedFiles((prevFiles) => [
+          ...prevFiles,
+          response.data.new_filename,
+        ]);
+        setFile(null);
+        toast({
+          title: "Document Upload",
+          description: "Document uploaded successfully.",
+          variant: "default",
+        });
+      });
+    } catch (error) {
+      toast({
+        title: "Document Upload",
+        description: "Failed to upload document.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleSubmitResolution = async () => {
     try {
       const jsonString = JSON.stringify(uploadedFiles);
-      const response = await submitResolution(
+      await submitResolution(
         jsonString,
         ticketDetails.ticket_id,
         "",
         resolution
       );
-      console.log(response.data);
     } catch (error) {
-      console.log(error);
+      toast({
+        title: "Resolution Submission",
+        description: "Failed to submit resoltion.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -82,15 +110,17 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({ ticketDetails }) => {
               <p className="">{value.description}</p>
             </div>
 
-            {value.supporting_files.map((file, index) => (
-              <span
-                key={index}
-                className="cursor-pointer border border-muted p-1 hover:bg-muted rounded-md"
-                onClick={() => handleDownloadDocument(file)}
-              >
-                <File className="h-3 w-3" />
-              </span>
-            ))}
+            <div className="flex gap-1">
+              {value.supporting_files.map((file, index) => (
+                <span
+                  key={index}
+                  className="cursor-pointer border border-muted p-1 hover:bg-muted rounded-md"
+                  onClick={() => handleDownloadDocument(file)}
+                >
+                  <File className="h-3 w-3" />
+                </span>
+              ))}
+            </div>
           </div>
         ))
       ) : (
@@ -131,12 +161,13 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({ ticketDetails }) => {
           <Button
             disabled={
               ticketDetails?.username != ticketDetails?.bucket ||
-              ticketDetails?.status === "closed"
+              ticketDetails?.status === "closed" ||
+              isPending
             }
             type="button"
             onClick={handleUpload}
           >
-            Upload
+            {isPending ? "Uploading..." : "Upload"}
           </Button>
 
           <Button

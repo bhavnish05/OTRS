@@ -21,7 +21,6 @@ import { Tickets } from "@/lib/types";
 import { getTickets } from "@/components/api/dashboardApi";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { removeToken } from "@/components/api/authApi";
 import { pickupTicket } from "@/components/api/ticketsApi";
 
 export type DensityState = "sm" | "md" | "lg";
@@ -39,14 +38,10 @@ export interface DensityInstance {
   toggleDensity: (value?: DensityState) => void;
 }
 
-// Use declaration merging to add our new feature APIs and state types to TanStack Table's existing types.
 declare module "@tanstack/react-table" {
-  //merge our new feature's state with the existing table state
   interface TableState extends DensityTableState {}
-  //merge our new feature's options with the existing table options
   interface TableOptionsResolved<TData extends RowData>
     extends DensityOptions {}
-  //merge our new feature's instance APIs with the existing table instance APIs
   interface Table<TData extends RowData> extends DensityInstance {}
   // if you need to add cell instance APIs...
   // interface Cell<TData extends RowData, TValue> extends DensityCell
@@ -63,9 +58,7 @@ declare module "@tanstack/react-table" {
 
 // end of TS setup!
 
-// Here is all of the actual javascript code for our new feature
 export const DensityFeature: TableFeature<any> = {
-  // define the new feature's initial state
   getInitialState: (state): DensityTableState => {
     return {
       density: "md",
@@ -73,7 +66,6 @@ export const DensityFeature: TableFeature<any> = {
     };
   },
 
-  // define the new feature's default options
   getDefaultOptions: <TData extends RowData>(
     table: Table<TData>
   ): DensityOptions => {
@@ -82,12 +74,7 @@ export const DensityFeature: TableFeature<any> = {
       onDensityChange: makeStateUpdater("density", table),
     } as DensityOptions;
   },
-  // if you need to add a default column definition...
-  // getDefaultColumnDef: <TData extends RowData>(): Partial<ColumnDef<TData>> => {
-  //   return { meta: {} } //use meta instead of directly adding to the columnDef to avoid typescript stuff that's hard to workaround
-  // },
 
-  // define the new feature's table instance methods
   createTable: <TData extends RowData>(table: Table<TData>): void => {
     table.setDensity = (updater) => {
       const safeUpdater: Updater<DensityState> = (old) => {
@@ -103,19 +90,8 @@ export const DensityFeature: TableFeature<any> = {
       });
     };
   },
-
-  // if you need to add row instance APIs...
-  // createRow: <TData extends RowData>(row, table): void => {},
-  // if you need to add cell instance APIs...
-  // createCell: <TData extends RowData>(cell, column, row, table): void => {},
-  // if you need to add column instance APIs...
-  // createColumn: <TData extends RowData>(column, table): void => {},
-  // if you need to add header instance APIs...
-  // createHeader: <TData extends RowData>(header, table): void => {},
 };
-//end of custom feature code
 
-//app code
 function App() {
   const [pickupStatus, setPickupStatus] = useState<{ [key: string]: string }>(
     {}
@@ -255,46 +231,27 @@ function App() {
   });
 
   const handlePickup = async (id: number) => {
-    console.log("clicked");
-
     try {
       const response = await pickupTicket(id);
 
       setPickupStatus((prev) => ({ ...prev, [id]: response.data.msg }));
-      setClicked((prev) => ({ ...prev, [id]: true })); // update clicked state to indicate the ticket was picked up
-      setPick(false); // disable the pick-up button after clicking
+      setClicked((prev) => ({ ...prev, [id]: true }));
+      setPick(false);
     } catch (error) {
       console.log(error);
-      if (error.response && error.response.status === 401) {
-        removeToken();
-        alert("Session expired! Please login again.");
-        navigate("/login");
-      } else {
-        alert("Something went wrong.");
-      }
     }
   };
 
   async function handleTicketsFetch() {
     try {
       const response = await getTickets();
-
       _setData(response.data.ticketId);
-
       console.log(response.data);
-
       response.data.ticketId.map((value, index) => {
         setPick(value.canPick);
       });
     } catch (error) {
       console.log(error);
-      if (error.response && error.response.status === 401) {
-        removeToken();
-        alert("Session expired ! ,login again");
-        navigate("/login");
-      } else {
-        alert("Something Went Wrong");
-      }
     }
   }
 
@@ -312,8 +269,6 @@ function App() {
       </button> */}
       <div className="overflow-x-auto">
         <div className="block min-w-[1700px]">
-          {" "}
-          {/* Adjust min-width as needed */}
           <table className="w-full">
             <thead className="border-b ">
               {table.getHeaderGroups().map((headerGroup) => (

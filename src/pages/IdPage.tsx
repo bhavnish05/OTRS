@@ -3,8 +3,18 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 
-import { removeToken } from "@/components/api/authApi";
 import { TicketDetails } from "@/lib/types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
@@ -20,7 +30,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { getUsers } from "@/components/api/userApi";
 import {
@@ -30,84 +39,94 @@ import {
 } from "@/components/api/ticketsApi";
 import ResolutionTab from "@/components/resolution-tab";
 import AuditTab from "@/components/audit-tab";
+import { useToast } from "@/components/ui/use-toast";
+import { BookOpenText } from "lucide-react";
+
+const headerFields: string[] = [
+  "ticket_id",
+  "title",
+  "type",
+  "breach_status",
+  "bucket",
+  "customer_id",
+  "raised_by_id",
+  "raised_at",
+  "severity",
+  "sla_due",
+  "status",
+];
 
 const IdPage = () => {
+  const { toast } = useToast();
+  const { id } = useParams();
+  const navigate = useNavigate();
+
   const [ticketDetails, setTicketDetails] = useState<TicketDetails | null>(
     null
   );
 
-  const [selectUser, setSelectUser] = useState(false);
-  const [selectGroup, setSelectGroup] = useState(false);
-  const [users, setUsers] = useState([]);
-  const [groups, setGroups] = useState([]);
+  const [selectUser, setSelectUser] = useState<boolean>(false);
+  const [selectGroup, setSelectGroup] = useState<boolean>(false);
+  const [users, setUsers] = useState<{ username: string }[]>([]);
+  const [groups, setGroups] = useState<{ group_name: string }[]>([]);
 
-  const [assignType, setAssignType] = useState("");
-  const [assignToGroup, setAssignToGroup] = useState("");
-  const [assignToUser, setAssignToUser] = useState("");
+  const [assignType, setAssignType] = useState<string>("");
+  const [assignToGroup, setAssignToGroup] = useState<string>("");
+  const [assignToUser, setAssignToUser] = useState<string>("");
+  const [closeTicketDialog, setCloseTicketDialog] = useState<boolean>(false);
 
-  const [assignDialog, setAssignDialog] = useState(false);
-  const [closeTicketDialog, setCloseTicketDialog] = useState(false);
-
-  const { id } = useParams();
-  const navigate = useNavigate();
-
-  async function handleDetailsFetch() {
+  async function handleFetchTicketDetails() {
     try {
       const response = await getTicketDetails(id);
       setTicketDetails(response.data);
-      console.log(response.data);
     } catch (error) {
-      removeToken();
-      navigate("/login");
+      toast({
+        title: "Ticket Details",
+        description: "Failed to fetch ticket details",
+        variant: "destructive",
+      });
     }
   }
 
   useEffect(() => {
-    handleDetailsFetch();
+    handleFetchTicketDetails();
   }, [id]);
 
   const handleUser = async (value: string) => {
-    if (ticketDetails?.username != ticketDetails?.bucket) {
-      setAssignDialog(true);
-    } else if (value === "user") {
-      setSelectUser(true);
-      setSelectGroup(false);
-      setAssignType(value);
-      try {
+    try {
+      if (value === "user") {
+        setSelectUser(true);
+        setSelectGroup(false);
+        setAssignType(value);
         const response = await getUsers();
-        console.log(response.data);
         setUsers(response.data.users);
-        setGroups(response.data.groups);
-      } catch (error) {
-        console.log(error);
-      }
-    } else if (value === "group") {
-      setSelectGroup(true);
-      setSelectUser(false);
-      setAssignType(value);
-      try {
+      } else {
+        setSelectGroup(true);
+        setSelectUser(false);
+        setAssignType(value);
         const response = await getUsers();
-        console.log(response.data);
-        setUsers(response.data.users);
         setGroups(response.data.groups);
-      } catch (error) {
-        console.log(error);
       }
+    } catch (error) {
+      console.log(error);
     }
   };
 
   const handleAssign = async () => {
     try {
-      const response = await assignTicket(
+      await assignTicket(
         assignType,
         assignToGroup,
         assignToUser,
         parseInt(ticketDetails?.ticket_id!),
         id!
       );
-      console.log(response);
     } catch (error) {
-      console.log(error);
+      toast({
+        title: "Ticket Assignment",
+        description: "Failed to assign ticket to an user",
+        variant: "destructive",
+      });
     }
   };
 
@@ -116,23 +135,13 @@ const IdPage = () => {
       await closeTicket(id!);
       setCloseTicketDialog(true);
     } catch (error) {
-      console.log(error);
+      toast({
+        title: "Ticket Closure",
+        description: "Failed to close the ticket",
+        variant: "destructive",
+      });
     }
   };
-
-  const headerFields: string[] = [
-    "ticket_id",
-    "title",
-    "type",
-    "breach_status",
-    "bucket",
-    "customer_id",
-    "raised_by_id",
-    "raised_at",
-    "severity",
-    "sla_due",
-    "status",
-  ];
 
   return (
     <div className="p-4">
@@ -160,10 +169,13 @@ const IdPage = () => {
 
         <div className="p-4 bg-muted rounded-md max-w-full">
           <TabsContent value="description">
-            <p className="text-xs font-bold text-muted-foreground">
-              Description
-            </p>
-            <p>{ticketDetails && ticketDetails.description}</p>
+            <div className="flex items-center gap-2">
+              <BookOpenText className="h-4 w-4 text-muted-foreground" />
+              <p className="text-xs font-bold text-muted-foreground">
+                Description
+              </p>
+            </div>
+            <p className="mt-2 p-2 bg-background rounded-md">{ticketDetails && ticketDetails.description}</p>
           </TabsContent>
 
           <TabsContent value="resolution">
@@ -180,7 +192,10 @@ const IdPage = () => {
         <p className="text-xs font-bold text-muted-foreground">Assign</p>
 
         <div className="flex gap-2 mt-2">
-          <Select onValueChange={(value) => handleUser(value)}>
+          <Select
+            onValueChange={(value) => handleUser(value)}
+            disabled={ticketDetails?.username != ticketDetails?.bucket}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Select" />
             </SelectTrigger>
@@ -232,11 +247,11 @@ const IdPage = () => {
         </div>
       </div>
 
-      <Dialog>
-        <DialogTrigger asChild>
+      <AlertDialog>
+        <AlertDialogTrigger>
           <Button
             disabled={
-              ticketDetails?.username != ticketDetails?.bucket ||
+              ticketDetails?.username !== ticketDetails?.bucket &&
               ticketDetails?.status === "closed"
             }
             className="float-end mr-4 mt-6 mb-5"
@@ -244,33 +259,25 @@ const IdPage = () => {
           >
             Close Ticket
           </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>
-              Are you sure, you want to close this ticket?
-            </DialogTitle>
-            <DialogDescription>This Action is irreversible!</DialogDescription>
-          </DialogHeader>
-
-          <DialogFooter>
-            <Button onClick={handleTicketClose} variant="destructive">
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will close this ticket.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive"
+              onClick={handleTicketClose}
+            >
               Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={assignDialog} onOpenChange={setAssignDialog}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Ticket is not in your bucket!</DialogTitle>
-            <DialogDescription>Cannot Assign!</DialogDescription>
-          </DialogHeader>
-          Try Assigning some other ticket.
-          <DialogFooter></DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={closeTicketDialog} onOpenChange={setCloseTicketDialog}>
         <DialogContent className="sm:max-w-[425px]">
@@ -281,9 +288,7 @@ const IdPage = () => {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => navigate("/")} variant="primary">
-              Go to Dashboard
-            </Button>
+            <Button onClick={() => navigate("/")}>Go to Dashboard</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
