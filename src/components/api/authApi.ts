@@ -1,5 +1,5 @@
 import { OTPValidate } from "@/lib/types";
-import axios, { AxiosResponse } from "axios";
+import axios, {  AxiosResponse } from "axios";
 
 export const getToken = (): string => {
   return localStorage.getItem("token") || "";
@@ -7,8 +7,11 @@ export const getToken = (): string => {
 
 export const setToken = (token: string): void => {
   localStorage.setItem("token", token);
-};
 
+};
+export const getUsername = (): string => {
+  return localStorage.getItem("username") || "";
+};
 export const removeToken = (): void => {
   localStorage.removeItem("token");
 };
@@ -22,6 +25,8 @@ export const loginAPI = (data: {
   username: string;
   password: string;
 }): Promise<AxiosResponse> => {
+  console.log("triggered");
+
   const token = btoa(`${data.username}:${data.password}`);
 
   return axios.post(

@@ -11,14 +11,24 @@ import {
 } from "@/components/ui/popover";
 import { ModeToggle } from "./mode-toggle";
 import { toast } from "./ui/use-toast";
+import { useState, useEffect } from "react";
 
 const TopBar = () => {
+  const [username, setUsername] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedUsername =localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
 
   const handleLogout = async () => {
     try {
       await logout();
       removeToken();
+      localStorage.removeItem("username");
       navigate("/login", { replace: true });
     } catch (error) {
       toast({
@@ -40,6 +50,7 @@ const TopBar = () => {
       </Link>
 
       <div className="flex gap-4 items-center">
+      <p className="text-md font-semibold">Welcome {username}</p> 
         <Button variant="outline" size="icon">
           <Home onClick={handleHome} className="h-4 w-4 cursor-pointer" />
         </Button>

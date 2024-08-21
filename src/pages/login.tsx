@@ -44,8 +44,11 @@ const Login = () => {
     try {
       const response = await loginAPI(values);
       setUsername(values.username);
+      console.log(response);
+      
       setId(response.data.uniqueId);
       setOtpValidate(true);
+      localStorage.setItem("username", values.username);
       toast({
         title: "Authentication",
         description: "OTP has been sent.",

@@ -78,6 +78,7 @@ const IdPage = () => {
   async function handleFetchTicketDetails() {
     try {
       const response = await getTicketDetails(id);
+      console.log(response.data);
       setTicketDetails(response.data);
     } catch (error) {
       toast({
@@ -145,7 +146,7 @@ const IdPage = () => {
 
   return (
     <div className="p-4">
-      <div className="grid grid-cols-3 gap-3 p-4 rounded-lg bg-muted">
+      <div className="grid grid-cols-3 gap-3 p-4 rounded-md border bg-muted">
         {ticketDetails &&
           headerFields.map(
             (field) =>
@@ -161,13 +162,46 @@ const IdPage = () => {
       </div>
 
       <Tabs defaultValue="description" className="max-w-screen-2xl">
-        <TabsList className="my-2">
-          <TabsTrigger value="description">Description</TabsTrigger>
-          <TabsTrigger value="resolution">Resolution</TabsTrigger>
-          <TabsTrigger value="audit">Audit</TabsTrigger>
-        </TabsList>
+        <div className="flex justify-between items-center">
+          <TabsList className="my-2">
+            <TabsTrigger value="description">Description</TabsTrigger>
+            <TabsTrigger value="resolution">Resolution</TabsTrigger>
+            <TabsTrigger value="audit">Audit</TabsTrigger>
+          </TabsList>
+          <AlertDialog>
+            <AlertDialogTrigger>
+              <Button
+                disabled={
+                  ticketDetails?.username !== ticketDetails?.bucket ||
+                  ticketDetails?.status === "closed"
+                }
+                className="float-end mr-4 mt-6 mb-5"
+                variant="destructive"
+              >
+                Close Ticket
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action will close this ticket.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive"
+                  onClick={handleTicketClose}
+                >
+                  Close
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
 
-        <div className="p-4 bg-muted rounded-md max-w-full">
+        <div className="p-4 bg-muted rounded-md border">
           <TabsContent value="description">
             <div className="flex items-center gap-2">
               <BookOpenText className="h-4 w-4 text-muted-foreground" />
@@ -175,11 +209,16 @@ const IdPage = () => {
                 Description
               </p>
             </div>
-            <p className="mt-2 p-2 bg-background rounded-md">{ticketDetails && ticketDetails.description}</p>
+            <p className="mt-4 p-2 bg-background rounded-md">
+              {ticketDetails && ticketDetails.description}
+            </p>
           </TabsContent>
 
           <TabsContent value="resolution">
-            <ResolutionTab ticketDetails={ticketDetails!} />
+            <ResolutionTab
+              ticketDetails={ticketDetails!}
+              fetchTicketDetails={handleFetchTicketDetails}
+            />
           </TabsContent>
 
           <TabsContent value="audit">
@@ -188,7 +227,7 @@ const IdPage = () => {
         </div>
       </Tabs>
 
-      <div className="bg-muted rounded-md p-4 mt-2">
+      <div className="bg-muted rounded-md border p-4 mt-2">
         <p className="text-xs font-bold text-muted-foreground">Assign</p>
 
         <div className="flex gap-2 mt-2">
@@ -247,37 +286,6 @@ const IdPage = () => {
         </div>
       </div>
 
-      <AlertDialog>
-        <AlertDialogTrigger>
-          <Button
-            disabled={
-              ticketDetails?.username !== ticketDetails?.bucket &&
-              ticketDetails?.status === "closed"
-            }
-            className="float-end mr-4 mt-6 mb-5"
-            variant="destructive"
-          >
-            Close Ticket
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action will close this ticket.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-destructive"
-              onClick={handleTicketClose}
-            >
-              Close
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <Dialog open={closeTicketDialog} onOpenChange={setCloseTicketDialog}>
         <DialogContent className="sm:max-w-[425px]">

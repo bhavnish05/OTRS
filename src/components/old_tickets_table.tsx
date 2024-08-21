@@ -38,11 +38,15 @@ export interface DensityInstance {
   toggleDensity: (value?: DensityState) => void;
 }
 
+// Use declaration merging to add our new feature APIs and state types to TanStack Table's existing types.
 declare module "@tanstack/react-table" {
-  interface TableState extends DensityTableState {}
+  //merge our new feature's state with the existing table state
+  interface TableState extends DensityTableState { }
+  //merge our new feature's options with the existing table options
   interface TableOptionsResolved<TData extends RowData>
-    extends DensityOptions {}
-  interface Table<TData extends RowData> extends DensityInstance {}
+    extends DensityOptions { }
+  //merge our new feature's instance APIs with the existing table instance APIs
+  interface Table<TData extends RowData> extends DensityInstance { }
   // if you need to add cell instance APIs...
   // interface Cell<TData extends RowData, TValue> extends DensityCell
   // if you need to add row instance APIs...
@@ -58,6 +62,7 @@ declare module "@tanstack/react-table" {
 
 // end of TS setup!
 
+// Here is all of the actual javascript code for our new feature
 export const DensityFeature: TableFeature<any> = {
   getInitialState: (state): DensityTableState => {
     return {
@@ -74,7 +79,7 @@ export const DensityFeature: TableFeature<any> = {
       onDensityChange: makeStateUpdater("density", table),
     } as DensityOptions;
   },
-
+  
   createTable: <TData extends RowData>(table: Table<TData>): void => {
     table.setDensity = (updater) => {
       const safeUpdater: Updater<DensityState> = (old) => {
@@ -90,9 +95,11 @@ export const DensityFeature: TableFeature<any> = {
       });
     };
   },
+
+ 
 };
 
-function App() {
+function App(props: { filteredResults: any[] }) {
   const [pickupStatus, setPickupStatus] = useState<{ [key: string]: string }>(
     {}
   );
@@ -101,6 +108,14 @@ function App() {
   const [clicked, setClicked] = useState<{ [key: string]: boolean }>({});
   const [Pick, setPick] = useState(false);
   const navigate = useNavigate();
+  console.log("Filtered Results App:", Array.isArray(props.filteredResults));
+  console.log("Filtered Results in App:", props.filteredResults);
+
+  useEffect(() => {
+    _setData(props.filteredResults);
+  }, [props.filteredResults]); 
+console.log("filteredResults",data);
+
   const columns = React.useMemo<ColumnDef<Tickets>[]>(
     () => [
       {
@@ -109,12 +124,12 @@ function App() {
         cell: (info) => info.getValue(),
         footer: (props) => props.column.id,
       },
-      {
-        accessorKey: "customer_id",
-        header: "Customer ID",
-        cell: (info) => info.getValue(),
-        footer: (props) => props.column.id,
-      },
+      // {
+      //   accessorKey: "customer_id",
+      //   header: "Customer ID",
+      //   cell: (info) => info.getValue(),
+      //   footer: (props) => props.column.id,
+      // },
       {
         accessorKey: "customer_name",
         header: () => "Customer Name",
@@ -135,7 +150,6 @@ function App() {
         header: "Title",
         footer: (props) => props.column.id,
       },
-
       {
         accessorKey: "sla_due",
         header: "SLA-Due",
@@ -176,7 +190,6 @@ function App() {
         header: "Bucket",
         footer: (props) => props.column.id,
       },
-
       {
         accessorKey: "canPick",
         header: "Can Pick",
@@ -187,11 +200,10 @@ function App() {
 
           return (
             <Button
-              className={`p-2 ${
-                canPick && !isPicked
-                  ? "bg-violet-600 hover:bg-yellow-400"
-                  : "bg-gray-400"
-              } font-thin text-sm`}
+              className={`p-2 ${canPick && !isPicked
+                ? "bg-violet-600 hover:bg-yellow-400"
+                : "bg-gray-400"
+                } font-thin text-sm`}
               disabled={!canPick || isPicked} // disable button if cannot pick or already picked
               onClick={() => handlePickup(ticketId)}
             >
@@ -231,6 +243,7 @@ function App() {
   });
 
   const handlePickup = async (id: number) => {
+
     try {
       const response = await pickupTicket(id);
 
@@ -239,19 +252,26 @@ function App() {
       setPick(false);
     } catch (error) {
       console.log(error);
+      
     }
   };
 
   async function handleTicketsFetch() {
     try {
       const response = await getTickets();
+
       _setData(response.data.ticketId);
-      console.log(response.data);
+      console.log(data);
+
+      console.log("datadatadata", response.data.ticketId);
+
       response.data.ticketId.map((value, index) => {
+
         setPick(value.canPick);
       });
     } catch (error) {
       console.log(error);
+      
     }
   }
 
@@ -260,6 +280,7 @@ function App() {
   }, []);
 
   return (
+    
     <div className="p-2">
       {/* <button
         onClick={() => table.toggleDensity()}
@@ -270,13 +291,13 @@ function App() {
       <div className="overflow-x-auto">
         <div className="block min-w-[1700px]">
           <table className="w-full">
-            <thead className="border-b ">
+            <thead className="border-b">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr className="" key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     return (
                       <th
-                        className="font-normal border "
+                        className="font-normal border"
                         key={header.id}
                         colSpan={header.colSpan}
                         style={{
@@ -285,8 +306,8 @@ function App() {
                             density === "sm"
                               ? "4px"
                               : density === "md"
-                              ? "3px"
-                              : "7px",
+                                ? "3px"
+                                : "7px",
                           transition: "padding 0.2s",
                         }}
                       >
@@ -322,10 +343,7 @@ function App() {
             <tbody>
               {table.getRowModel().rows.map((row) => {
                 return (
-                  <tr
-                    className="hover:bg-violet-600 whitespace-nowrap"
-                    key={row.id}
-                  >
+                  <tr className=" hover:bg-violet-600 whitespace-nowrap" key={row.id}>
                     {row.getVisibleCells().map((cell) => {
                       return (
                         <td
@@ -334,20 +352,19 @@ function App() {
                             textAlign: "center",
                             fontSize: "13px",
                             fontWeight: "normal",
-
                             padding:
                               density === "sm"
                                 ? "4px"
                                 : density === "md"
-                                ? "4px"
-                                : "8px",
+                                  ? "4px"
+                                  : "8px",
                             transition: "padding 0.2s",
                           }}
                           onClick={() => {
                             cell.column.id === "ticket_id" &&
                               navigate(`/idPage/${cell.getValue()}`);
                           }}
-                          className="border cursor-pointer "
+                          className="border cursor-pointer"
                         >
                           {flexRender(
                             cell.column.columnDef.cell,
@@ -363,7 +380,6 @@ function App() {
           </table>
         </div>
       </div>
-
       <div className="flex items-center gap-2 mt-4">
         <button
           className="border rounded p-1"
@@ -431,6 +447,7 @@ function App() {
       </div>
       <pre>{JSON.stringify(table.getState().pagination, null, 2)}</pre> */}
     </div>
+    
   );
 }
 

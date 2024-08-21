@@ -28,8 +28,10 @@ export const submitResolution = async (
   });
 };
 
-export const pickupTicket = async (id: string): Promise<AxiosResponse> => {
-  return axiosInstance.post(`/ticket_pickup/${id}`, {});
+export const pickupTicket = async (
+  ticket_id: number
+): Promise<AxiosResponse> => {
+  return axiosInstance.post(`/ticket_pickup/${ticket_id}`, {});
 };
 
 export const assignTicket = async (
@@ -49,6 +51,19 @@ export const assignTicket = async (
 
 export const downloadDocument = async (
   document_name: string
-): Promise<AxiosResponse> => {
-  return axiosInstance.post(`/download_document/${document_name}`, {});
+): Promise<AxiosResponse<ArrayBuffer>> => {
+  return axiosInstance.post(
+    `/download_document/${document_name}`,
+    {},
+    {
+      responseType: "arraybuffer",
+    }
+  );
+};
+
+export const uploadDocument = async (file: string | Blob | null) => {
+  const formData = new FormData();
+  formData.append("file", file!);
+
+  return axiosInstance.post("/file_upload", formData);
 };
