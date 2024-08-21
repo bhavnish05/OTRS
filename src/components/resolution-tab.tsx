@@ -7,7 +7,7 @@ import {
   uploadDocument,
 } from "./api/ticketsApi";
 
-import { File, PencilLine, Plus, XCircle } from "lucide-react";
+import { Check, File, PencilLine, Plus, Upload, XCircle } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
@@ -138,7 +138,9 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
           {ticketDetails?.resolutions.length !== 0 ? (
             ticketDetails?.resolutions.map((value, index) => (
               <div className="flex gap-2 items-center">
-                <p className="text-muted-foreground text-xs text-right w-[20px]">{index + 1}.</p>
+                <p className="text-muted-foreground text-xs text-right w-[20px]">
+                  {index + 1}.
+                </p>
                 <div
                   className="flex justify-between gap-2 border p-2 rounded-md w-full"
                   key={index}
@@ -168,7 +170,11 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
               </div>
             ))
           ) : (
-            <p className="py-2 text-muted-foreground">No Resolutions Found</p>
+            <div className="flex w-full h-full justify-center items-center">
+              <p className="font-bold text-muted-foreground mt-32">
+                No Resolutions Found
+              </p>
+            </div>
           )}
         </div>
       </ScrollArea>
@@ -212,8 +218,11 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
             }
             type="button"
             onClick={handleUpload}
+            variant="outline"
+            className="flex gap-3 items-center"
           >
-            {isPending ? "Uploading..." : "Upload"}
+            <p>{isPending ? "Uploading..." : "Upload"}</p>
+            <Upload className="h-4 w-4" />
           </Button>
 
           <Button
@@ -223,8 +232,10 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
             }
             type="button"
             onClick={handleSubmitResolution}
+            className="flex gap-3 items-center"
           >
-            Submit
+            <p>Submit</p>
+            <Check className="h-4 w-4" />
           </Button>
         </div>
       </div>

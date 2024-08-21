@@ -9,7 +9,7 @@ import AuthGuard from "./guard/authGuard";
 import Protected from "./pages/protected";
 import Home from "./pages/home";
 import Login from "./pages/login";
-import IdPage from "./pages/IdPage";
+import Ticket from "./pages/ticket";
 
 const router = createBrowserRouter([
   {
@@ -25,8 +25,8 @@ const router = createBrowserRouter([
         element: <AuthGuard children={<Home />} />,
       },
       {
-        path: "/idPage/:id",
-        element: <AuthGuard children={<IdPage />} />,
+        path: "/ticket/:id",
+        element: <AuthGuard children={<Ticket />} />,
       },
     ],
   },
@@ -36,7 +36,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <RouterProvider router={router} />
-      <Toaster/>
+      <Toaster />
     </ThemeProvider>
   </React.StrictMode>
 );

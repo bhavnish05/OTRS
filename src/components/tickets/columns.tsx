@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Tickets } from "@/lib/types";
 import { pickupTicket } from "../api/ticketsApi";
 
-import { ArrowUpDown, ExternalLink} from "lucide-react";
+import { ArrowUpDown, ExternalLink } from "lucide-react";
 import { Button } from "../ui/button";
 
 export const columns: ColumnDef<Tickets>[] = [
@@ -24,7 +24,7 @@ export const columns: ColumnDef<Tickets>[] = [
     cell: (data) => {
       return (
         <Link
-          to={`/idPage/${data.cell.getValue() as string}`}
+          to={`/ticket/${data.cell.getValue() as string}`}
           className="flex gap-1 items-center group"
         >
           <p>{data.cell.getValue() as string}</p>
@@ -83,7 +83,14 @@ export const columns: ColumnDef<Tickets>[] = [
       return (
         <Button
           disabled={!canPick}
-          onClick={async () => await pickupTicket(ticketId)}
+          onClick={async () => {
+            try {
+              await pickupTicket(ticketId);
+              window.location.href = window.origin + `/ticket/${ticketId}`;
+            } catch (error) {
+              console.log(error);
+            }
+          }}
         >
           {canPick ? "Pick" : "Picked"}
         </Button>

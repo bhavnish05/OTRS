@@ -40,7 +40,17 @@ import {
 import ResolutionTab from "@/components/resolution-tab";
 import AuditTab from "@/components/audit-tab";
 import { useToast } from "@/components/ui/use-toast";
-import { BookOpenText } from "lucide-react";
+import DescriptionTab from "@/components/description-tab";
+import { PersonIcon } from "@radix-ui/react-icons";
+import {
+  BookOpenText,
+  BookText,
+  Check,
+  PencilLine,
+  User,
+  Users,
+  XCircle,
+} from "lucide-react";
 
 const headerFields: string[] = [
   "ticket_id",
@@ -56,7 +66,7 @@ const headerFields: string[] = [
   "status",
 ];
 
-const IdPage = () => {
+const Ticket = () => {
   const { toast } = useToast();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -78,8 +88,6 @@ const IdPage = () => {
   async function handleFetchTicketDetails() {
     try {
       const response = await getTicketDetails(id);
-      console.log(response.data);
-
       setTicketDetails(response.data);
     } catch (error) {
       toast({
@@ -110,25 +118,37 @@ const IdPage = () => {
         setGroups(response.data.groups);
       }
     } catch (error) {
-      console.log(error);
+      toast({
+        title: "User Group",
+        description: "Failed to fetch users and groups",
+        variant: "destructive",
+      });
     }
   };
 
   const handleAssign = async () => {
-    try {
-      await assignTicket(
-        assignType,
-        assignToGroup,
-        assignToUser,
-        parseInt(ticketDetails?.ticket_id!),
-        id!
-      );
-    } catch (error) {
+    if (!assignType || !assignToGroup || !assignToUser) {
       toast({
         title: "Ticket Assignment",
-        description: "Failed to assign ticket to an user",
+        description: "Please select a valid user or group.",
         variant: "destructive",
       });
+    } else {
+      try {
+        await assignTicket(
+          assignType,
+          assignToGroup,
+          assignToUser,
+          parseInt(ticketDetails?.ticket_id!),
+          id!
+        );
+      } catch (error) {
+        toast({
+          title: "Ticket Assignment",
+          description: "Failed to assign ticket to an user",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -165,9 +185,21 @@ const IdPage = () => {
       <Tabs defaultValue="description" className="max-w-screen-2xl">
         <div className="flex justify-between items-center">
           <TabsList className="my-2">
-            <TabsTrigger value="description">Description</TabsTrigger>
-            <TabsTrigger value="resolution">Resolution</TabsTrigger>
-            <TabsTrigger value="audit">Audit</TabsTrigger>
+            <TabsTrigger
+              value="description"
+              className="flex gap-2 items-center"
+            >
+              <BookOpenText className="h-4 w-4" />
+              <p>Description</p>
+            </TabsTrigger>
+            <TabsTrigger value="resolution" className="flex gap-2 items-center">
+              <PencilLine className="h-4 w-4" />
+              <p>Resolutions</p>
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="flex gap-2 items-center">
+              <BookText className="h-4 w-4" />
+              <p>Audit</p>
+            </TabsTrigger>
           </TabsList>
           <AlertDialog>
             <AlertDialogTrigger>
@@ -176,10 +208,11 @@ const IdPage = () => {
                   ticketDetails?.username !== ticketDetails?.bucket ||
                   ticketDetails?.status === "closed"
                 }
-                className="float-end mr-4 mt-6 mb-5"
+                className="float-end flex gap-3 items-center"
                 variant="destructive"
               >
-                Close Ticket
+                <p>Close Ticket</p>
+                <XCircle className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -204,15 +237,7 @@ const IdPage = () => {
 
         <div className="p-4 bg-muted rounded-md border">
           <TabsContent value="description">
-            <div className="flex items-center gap-2">
-              <BookOpenText className="h-4 w-4 text-muted-foreground" />
-              <p className="text-xs font-bold text-muted-foreground">
-                Description
-              </p>
-            </div>
-            <p className="mt-4 p-2 bg-background rounded-md">
-              {ticketDetails && ticketDetails.description}
-            </p>
+            <DescriptionTab ticketDetails={ticketDetails!} />
           </TabsContent>
 
           <TabsContent value="resolution">
@@ -229,7 +254,10 @@ const IdPage = () => {
       </Tabs>
 
       <div className="bg-muted rounded-md border p-4 mt-2">
-        <p className="text-xs font-bold text-muted-foreground">Assign</p>
+        <div className="flex gap-2 items-center">
+          <PersonIcon className="h-3 w-3" />
+          <p className="text-xs font-bold text-muted-foreground">Assign</p>
+        </div>
 
         <div className="flex gap-2 mt-2">
           <Select
@@ -237,11 +265,21 @@ const IdPage = () => {
             disabled={ticketDetails?.username != ticketDetails?.bucket}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select" />
+              <SelectValue placeholder="Assign To" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="user">User</SelectItem>
-              <SelectItem value="group">Group</SelectItem>
+              <SelectItem value="user">
+                <span className="flex gap-2 items-center">
+                  <User className="h-4 w-4" />
+                  <p>User</p>
+                </span>
+              </SelectItem>
+              <SelectItem value="group">
+                <span className="flex gap-2 items-center">
+                  <Users className="h-4 w-4" />
+                  <p>Group</p>
+                </span>
+              </SelectItem>
             </SelectContent>
           </Select>
 
@@ -253,7 +291,10 @@ const IdPage = () => {
               <SelectContent>
                 {users.map((value, index) => (
                   <SelectItem value={value.username} key={index}>
-                    {value.username}
+                    <span className="flex gap-2 items-center">
+                      <User className="h-4 w-4" />
+                      <p>{value.username}</p>
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -268,7 +309,10 @@ const IdPage = () => {
               <SelectContent>
                 {groups.map((value, index) => (
                   <SelectItem value={value.group_name} key={index}>
-                    {value.group_name}
+                    <span className="flex gap-2 items-center">
+                      <Users className="h-4 w-4" />
+                      <p>{value.group_name}</p>
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -281,8 +325,10 @@ const IdPage = () => {
               ticketDetails?.status === "closed"
             }
             onClick={handleAssign}
+            className="flex gap-3 items-center"
           >
-            Assign
+            <p>Assign</p>
+            <Check className="h-4 w-4" />
           </Button>
         </div>
       </div>
@@ -304,4 +350,4 @@ const IdPage = () => {
   );
 };
 
-export default IdPage;
+export default Ticket;
