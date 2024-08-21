@@ -34,6 +34,7 @@ import { assign } from "@/components/api/assignApi";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { PlusCircle } from "lucide-react";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -68,7 +69,19 @@ const Home = () => {
     status: "",
     severity: "",
   });
-
+  const processGroups = (groups: any[]) => {
+    const uniqueGroups = new Map();
+  
+    groups.forEach(group => {
+      const key = `${group.group_name}-${group.customer_id}`;
+      if (!uniqueGroups.has(key)) {
+        uniqueGroups.set(key, group);
+      }
+    });
+  
+    return Array.from(uniqueGroups.values());
+  };
+  
   const [ticketData, setTicketData] = useState({
 
     ticketType: "",
@@ -84,27 +97,25 @@ const Home = () => {
     if (loggedInUser != currentBucket) {
       setAssignDialog(true);
       console.log("hello");
-    } else if (value === "user") {
-      setSelectUser(true);
-      setSelectGroup(false);
-      setAssignType(value);
+    } else {
       try {
         const response = await getUsers();
-        console.log(response.data);
-        setUsers(response.data.users);
-        setGroups(response.data.groups);
-      } catch (error) {
-        console.log(error);
-      }
-    } else if (value === "group") {
-      setSelectGroup(true);
-      setSelectUser(false);
-      setAssignType(value);
-      try {
-        const response = await getUsers();
-        console.log(response.data);
-        setUsers(response.data.users);
-        setGroups(response.data.groups);
+        console.log("selection",response.data);
+        // Reset the state based on the selection
+        if (value === "user") {
+          setSelectUser(true);
+          setSelectGroup(false);
+          setAssignType(value);
+          setUsers(response.data.users); // Set users data
+          setGroups([]); // Clear groups data
+        } else if (value === "group") {
+          setSelectGroup(true);
+          setSelectUser(false);
+          setAssignType(value);
+          const uniqueGroups = processGroups(response.data.groups);
+          setGroups(uniqueGroups); // Set groups data
+          setUsers([]); // Clear users data
+        }
       } catch (error) {
         console.log(error);
       }
@@ -149,13 +160,34 @@ const Home = () => {
       }));
     }
   };
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const fileArray = Array.from(files);
+      fileArray.forEach(file => {
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          const fileData = {
+            fileName: file.name,
+            base64: base64String,
+          };
+
+        };
+
+        reader.readAsDataURL(file); // Read file as base64
+      });
+    }
+  };
+
   const handleSelectChange = (id: string, value: string | number) => {
     setTicketData(prevState => ({
       ...prevState,
       [id]: value,
     }));
   };
- 
+
 
 
   const handleCreateTicket = async () => {
@@ -171,9 +203,9 @@ const Home = () => {
   };
   const handleApplyFilters = () => {
     const formatDate = (date) => {
-      if (!date) return ""; 
+      if (!date) return "";
       const d = new Date(date);
-      return d.toISOString().split('T')[0]; 
+      return d.toISOString().split('T')[0];
     };
     const processedData = {
       ...FiltersData,
@@ -214,7 +246,7 @@ const Home = () => {
         if (Array.isArray(response.data.customer)) {
           setCustomerDetails(response.data.customer);
         } else if (response.data.customer && typeof response.data.customer === 'object') {
-          setCustomerDetails([response.data.customer]); 
+          setCustomerDetails([response.data.customer]);
         } else {
           console.error("Unexpected data format:", response.data.customer);
         }
@@ -234,21 +266,25 @@ const Home = () => {
             <TooltipTrigger asChild>
               <Button
                 // className="mt-5 mr-5 p-5 bg-blue-600 rounded-full"
-                className="mt-5 mr-5 p-5 h-6 w-6 bg-blue-700 rounded-full"
+                className="mt-5 mr-5 p-5 "
                 variant="outline"
                 onClick={() => setNewTicketDialogOpen(true)}
               >
-                +
+                <span className="flex items-center">
+                  <p className="mr-2">Create</p>
+                  <PlusCircle className="h-4 w-4" />
+                </span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent >
               <p>Click here to create a New ticket</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
         {newTicketDialogOpen && (
           <Dialog open={newTicketDialogOpen} onOpenChange={setNewTicketDialogOpen}>
-            <DialogContent >
+            <DialogContent className=" overflow-auto">
+
               <DialogHeader>
                 <DialogTitle>Add New Ticket</DialogTitle>
                 <DialogDescription>Fill in the details to create a new ticket</DialogDescription>
@@ -323,63 +359,89 @@ const Home = () => {
                     onChange={handleInputChange}
                   />
                 </div>
-                <div className="border border-zinc-500 p-10 rounded-lg max-w-screen-2xl flex ">
-                  <Select disabled={ticketStatus === true} onValueChange={(value) => handleUser(value)}>
-                    <p className="pt-2 pr-2">Assign to:</p>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user">User</SelectItem>
-                      <SelectItem value="group">Group</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <div className="flex ">
-                    {selectUser && (
-                      <Select onValueChange={(value) => setAssignToUser(value)}>
-                        <p className="pt-2 pr-2 ml-20">Users:</p>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {users.map((value, index) => (
-                            <SelectItem value={value.username} key={index}>
-                              {value.username}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-
-                  <div className="flex">
-                    {selectGroup && (
-                      <Select onValueChange={(value) => setAssignToGroup(value)}>
-                        <p className="pt-2 pr-2 ml-20">Groups:</p>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {groups.map((value, index) => (
-                            <SelectItem value={value.group_name} key={index}>
-                              {value.group_name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-
-                  <Button
-                    disabled={loggedInUser != currentBucket || ticketStatus === true}
-                    className="ml-24"
-                    onClick={handleAssign}
-                  >
-                    Assign
-                  </Button>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="attachments" className="text-left">
+                    Attachments
+                  </Label>
+                  <Input
+                    id="attachments"
+                    type="file"
+                    multiple
+                    onChange={handleFileUpload} // Add your handler function here
+                    className="col-span-3"
+                  />
                 </div>
-              </div>
+                <div >
+                  <div className="flex flex-col">
+                    <div className="grid grid-cols-4 items-center mt-4 ">
+                      <Label htmlFor="Assign to" className="text-left">
+                        Assign to:
+                      </Label>
+                      <Select disabled={ticketStatus === true}
+                        onValueChange={(value) => handleUser(value)}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">User</SelectItem>
+                          <SelectItem value="group">Group</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        disabled={loggedInUser != currentBucket || ticketStatus === true}
+                        className="mt-4 ml-24 px-1 py-1 text-sm h-8 w-20 border-b border-gray-400"
+                        onClick={handleAssign}
+                      >
+                        Assign
+                      </Button>
+                    </div>
+                    {selectUser && (
+                      <div className="grid grid-cols-4 items-center mt-4 ">
+                        <Label htmlFor="Assign to" className="text-left">
+                          Users:
+                        </Label>
+                        <Select onValueChange={(value) => setAssignToUser(value)}>
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {users.map((value, index) => (
+                              <SelectItem value={value.username} key={index}>
+                                {value.username}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
 
+                    {selectGroup && (
+                      <div className="grid grid-cols-4 items-center mt-4 ">
+                        <Label htmlFor="Assign to" className="text-left">
+                          Groups:
+                        </Label>
+                        <Select onValueChange={(value) => setAssignToGroup(value)}>
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {groups.map((value, index) => (
+                              <SelectItem value={value.group_name} key={index}>
+                                {value.group_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+
+                      </div>
+
+                    )}
+
+                  </div>
+                </div>
+
+              </div>
               <DialogFooter>
                 <SheetClose asChild>
                   <Button type="submit" onClick={handleCreateTicket} >
@@ -528,7 +590,7 @@ const Home = () => {
                   className="col-span-3"
                 />
               </div>
-              
+
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="dueDate" className="text-left">
                   Due Date
@@ -567,7 +629,7 @@ const Home = () => {
       <div className="mt-2">
         <App filteredResults={filteredResults} />
       </div>
-    </div>
+    </div >
   );
 };
 
