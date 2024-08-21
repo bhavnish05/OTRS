@@ -1,17 +1,33 @@
+import { useState, useTransition } from "react";
+
 import { TicketDetails } from "@/lib/types";
+import {
+  downloadDocument,
+  submitResolution,
+  uploadDocument,
+} from "./api/ticketsApi";
+
 import { File, PencilLine, Plus, XCircle } from "lucide-react";
-import { downloadDocument, submitResolution } from "./api/ticketsApi";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useState, useTransition } from "react";
-import { uploadApi } from "./api/uploadApi";
 import { useToast } from "./ui/use-toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ScrollArea } from "./ui/scroll-area";
 
 interface ResolutionTabProps {
   ticketDetails: TicketDetails;
+  fetchTicketDetails: () => void;
 }
 
-const ResolutionTab: React.FC<ResolutionTabProps> = ({ ticketDetails }) => {
+const ResolutionTab: React.FC<ResolutionTabProps> = ({
+  ticketDetails,
+  fetchTicketDetails,
+}) => {
   const { toast } = useToast();
 
   const [resolution, setResolution] = useState("");
@@ -20,13 +36,27 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({ ticketDetails }) => {
 
   const [isPending, startTransition] = useTransition();
 
-  const handleDownloadDocument = async (file_name: string) => {
+  const handleDownloadDocument = async (document_name: string) => {
     try {
-      await downloadDocument(file_name);
-    } catch (error) {
+      const response = await downloadDocument(document_name);
+      if (response.status === 200 && response.data instanceof ArrayBuffer) {
+        const arrayBuffer = response.data;
+        const blob = new Blob([arrayBuffer], { type: "application/pdf" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = document_name;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        throw new Error("Unexpected response status or data format");
+      }
+    } catch (error: any) {
       toast({
-        title: "Document Download",
-        description: "Failed to download the document.",
+        title: "Download Failed",
+        description: error.message,
         variant: "destructive",
       });
     }
@@ -48,7 +78,7 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({ ticketDetails }) => {
     }
 
     try {
-      const response = await uploadApi(file);
+      const response = await uploadDocument(file);
       startTransition(() => {
         setUploadedFiles((prevFiles) => [
           ...prevFiles,
@@ -79,6 +109,10 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({ ticketDetails }) => {
         "",
         resolution
       );
+
+      fetchTicketDetails();
+      setUploadedFiles([]);
+      setResolution("");
     } catch (error) {
       toast({
         title: "Resolution Submission",
@@ -99,33 +133,45 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({ ticketDetails }) => {
         <p className="text-xs font-bold text-muted-foreground">Resolutions</p>
       </div>
 
-      {ticketDetails?.resolutions.length !== 0 ? (
-        ticketDetails?.resolutions.map((value, index) => (
-          <div
-            className="mt-2 flex justify-between gap-2 border border-muted rounded-md p-2 bg-background"
-            key={index}
-          >
-            <div className="flex gap-2">
-              <p className="text-muted-foreground">{index + 1}.</p>
-              <p className="">{value.description}</p>
-            </div>
-
-            <div className="flex gap-1">
-              {value.supporting_files.map((file, index) => (
-                <span
+      <ScrollArea className="w-full mt-4 p-3 h-[300px] border border-muted rounded-md bg-background">
+        <div className="flex flex-col gap-2">
+          {ticketDetails?.resolutions.length !== 0 ? (
+            ticketDetails?.resolutions.map((value, index) => (
+              <div className="flex gap-2 items-center">
+                <p className="text-muted-foreground text-xs text-right w-[20px]">{index + 1}.</p>
+                <div
+                  className="flex justify-between gap-2 border p-2 rounded-md w-full"
                   key={index}
-                  className="cursor-pointer border border-muted p-1 hover:bg-muted rounded-md"
-                  onClick={() => handleDownloadDocument(file)}
                 >
-                  <File className="h-3 w-3" />
-                </span>
-              ))}
-            </div>
-          </div>
-        ))
-      ) : (
-        <p className="py-2 text-muted-foreground">No Resolutions Found</p>
-      )}
+                  <p className="text-xs">{value.description}</p>
+
+                  <div className="flex gap-1">
+                    {value.supporting_files.map((file, index) => (
+                      <TooltipProvider>
+                        <Tooltip key={index}>
+                          <TooltipTrigger asChild>
+                            <span
+                              className="cursor-pointer border border-muted p-1 hover:bg-muted rounded-md"
+                              onClick={() => handleDownloadDocument(file)}
+                            >
+                              <File className="h-3 w-3" />
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{file}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="py-2 text-muted-foreground">No Resolutions Found</p>
+          )}
+        </div>
+      </ScrollArea>
 
       <div className="flex items-center gap-2 mt-4">
         <Plus className="h-4 w-4 text-muted-foreground" />
