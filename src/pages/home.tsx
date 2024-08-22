@@ -23,8 +23,13 @@ import {
 import { useNavigate, useParams } from "react-router-dom";
 import KPI from "@/components/kpi";
 import App from "@/components/old_tickets_table";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
+// import { TicketDetails } from "@/lib/types";
+import {
+  uploadDocument,
+} from "@/components/api/ticketsApi";
 import { createTicket } from "@/components/api/createTicketApi";
 import { getCustomerDetails } from "@/components/api/customerApi";
 
@@ -48,12 +53,15 @@ const Home = () => {
   const [assignToGroup, setAssignToGroup] = useState("");
   const [assignToUser, setAssignToUser] = useState("");
   const [ticketStatus, setTicketStatus] = useState(false);
-  const [test, setTest] = useState(null);
   const [currentBucket, setCurrentBucket] = useState("");
   const [loggedInUser, setLoggedInUser] = useState("");
   const [customerDetails, setCustomerDetails] = useState<{ customer_id: number; customer_name: string }[]>([]);
   const [assignDialog, setAssignDialog] = useState(false);
   const { id } = useParams();
+  const [isPending, startTransition] = useTransition();
+  const [file, setFile] = useState<File | null>(null);
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const { toast } = useToast();
 
   const [FiltersData, setFiltersData] = useState({
     sort_by: "ticket_id",
@@ -71,17 +79,17 @@ const Home = () => {
   });
   const processGroups = (groups: any[]) => {
     const uniqueGroups = new Map();
-  
+
     groups.forEach(group => {
       const key = `${group.group_name}-${group.customer_id}`;
       if (!uniqueGroups.has(key)) {
         uniqueGroups.set(key, group);
       }
     });
-  
+
     return Array.from(uniqueGroups.values());
   };
-  
+
   const [ticketData, setTicketData] = useState({
 
     ticketType: "",
@@ -91,50 +99,9 @@ const Home = () => {
       description: "",
     },
     remarks: "",
-    // attachments: []
+    filePath: []
+
   });
-  const handleUser = async (value: string) => {
-    if (loggedInUser != currentBucket) {
-      setAssignDialog(true);
-      console.log("hello");
-    } else {
-      try {
-        const response = await getUsers();
-        console.log("selection",response.data);
-        // Reset the state based on the selection
-        if (value === "user") {
-          setSelectUser(true);
-          setSelectGroup(false);
-          setAssignType(value);
-          setUsers(response.data.users); // Set users data
-          setGroups([]); // Clear groups data
-        } else if (value === "group") {
-          setSelectGroup(true);
-          setSelectUser(false);
-          setAssignType(value);
-          const uniqueGroups = processGroups(response.data.groups);
-          setGroups(uniqueGroups); // Set groups data
-          setUsers([]); // Clear users data
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  };
-  const handleAssign = async () => {
-    try {
-      const response = await assign(
-        assignType,
-        assignToGroup,
-        assignToUser,
-        ticketId,
-        id
-      );
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const handleFilterChange = (key, value) => {
     setFiltersData(prev => ({
@@ -160,26 +127,50 @@ const Home = () => {
       }));
     }
   };
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (files) {
-      const fileArray = Array.from(files);
-      fileArray.forEach(file => {
-        const reader = new FileReader();
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files ? e.target.files[0] : null;
+    setFile(selectedFile);
+  };
+  const handleUpload = async () => {
+    if (file === null) {
+      toast({
+        title: "Document Upload",
+        description: "Please select a file before uploading.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-        reader.onloadend = () => {
-          const base64String = reader.result as string;
-          const fileData = {
-            fileName: file.name,
-            base64: base64String,
-          };
+    try {
+      const response = await uploadDocument(file);
 
-        };
+      startTransition(() => {
+        setUploadedFiles((prevFiles) => [
+          ...prevFiles,
+          response.data.new_filename,
+        ]);
 
-        reader.readAsDataURL(file); // Read file as base64
+        setTicketData((prevData) => ({
+          ...prevData,
+          filePath: [...prevData.filePath, response.data.new_filename],
+        }));
+        console.log("ResponseforUpload", response.data.new_filename);
+        setFile(null);
+        toast({
+          title: "Document Upload",
+          description: "Document uploaded successfully.",
+          variant: "default",
+        });
+      });
+    } catch (error) {
+      toast({
+        title: "Document Upload",
+        description: "Failed to upload document.",
+        variant: "destructive",
       });
     }
   };
+
 
   const handleSelectChange = (id: string, value: string | number) => {
     setTicketData(prevState => ({
@@ -359,87 +350,16 @@ const Home = () => {
                     onChange={handleInputChange}
                   />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="attachments" className="text-left">
-                    Attachments
-                  </Label>
-                  <Input
-                    id="attachments"
-                    type="file"
-                    multiple
-                    onChange={handleFileUpload} // Add your handler function here
-                    className="col-span-3"
-                  />
+                <div className="flex gap-2">
+                  <Input id="file" type="file" onChange={handleFileChange} />
+                  <Button
+                    type="button"
+                    onClick={handleUpload}
+                  >
+                    {isPending ? "Uploading..." : "Upload"}
+                  </Button>
                 </div>
-                <div >
-                  <div className="flex flex-col">
-                    <div className="grid grid-cols-4 items-center mt-4 ">
-                      <Label htmlFor="Assign to" className="text-left">
-                        Assign to:
-                      </Label>
-                      <Select disabled={ticketStatus === true}
-                        onValueChange={(value) => handleUser(value)}
-                      >
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="user">User</SelectItem>
-                          <SelectItem value="group">Group</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button
-                        disabled={loggedInUser != currentBucket || ticketStatus === true}
-                        className="mt-4 ml-24 px-1 py-1 text-sm h-8 w-20 border-b border-gray-400"
-                        onClick={handleAssign}
-                      >
-                        Assign
-                      </Button>
-                    </div>
-                    {selectUser && (
-                      <div className="grid grid-cols-4 items-center mt-4 ">
-                        <Label htmlFor="Assign to" className="text-left">
-                          Users:
-                        </Label>
-                        <Select onValueChange={(value) => setAssignToUser(value)}>
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {users.map((value, index) => (
-                              <SelectItem value={value.username} key={index}>
-                                {value.username}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
 
-                    {selectGroup && (
-                      <div className="grid grid-cols-4 items-center mt-4 ">
-                        <Label htmlFor="Assign to" className="text-left">
-                          Groups:
-                        </Label>
-                        <Select onValueChange={(value) => setAssignToGroup(value)}>
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {groups.map((value, index) => (
-                              <SelectItem value={value.group_name} key={index}>
-                                {value.group_name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-
-                      </div>
-
-                    )}
-
-                  </div>
-                </div>
 
               </div>
               <DialogFooter>

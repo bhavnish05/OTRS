@@ -79,7 +79,7 @@ export const DensityFeature: TableFeature<any> = {
       onDensityChange: makeStateUpdater("density", table),
     } as DensityOptions;
   },
-  
+
   createTable: <TData extends RowData>(table: Table<TData>): void => {
     table.setDensity = (updater) => {
       const safeUpdater: Updater<DensityState> = (old) => {
@@ -96,7 +96,7 @@ export const DensityFeature: TableFeature<any> = {
     };
   },
 
- 
+
 };
 
 function App(props: { filteredResults: any[] }) {
@@ -113,8 +113,8 @@ function App(props: { filteredResults: any[] }) {
 
   useEffect(() => {
     _setData(props.filteredResults);
-  }, [props.filteredResults]); 
-console.log("filteredResults",data);
+  }, [props.filteredResults]);
+  console.log("filteredResults", data);
 
   const columns = React.useMemo<ColumnDef<Tickets>[]>(
     () => [
@@ -252,7 +252,7 @@ console.log("filteredResults",data);
       setPick(false);
     } catch (error) {
       console.log(error);
-      
+
     }
   };
 
@@ -271,7 +271,7 @@ console.log("filteredResults",data);
       });
     } catch (error) {
       console.log(error);
-      
+
     }
   }
 
@@ -280,7 +280,7 @@ console.log("filteredResults",data);
   }, []);
 
   return (
-    
+
     <div className="p-2">
       {/* <button
         onClick={() => table.toggleDensity()}
@@ -447,7 +447,7 @@ console.log("filteredResults",data);
       </div>
       <pre>{JSON.stringify(table.getState().pagination, null, 2)}</pre> */}
     </div>
-    
+
   );
 }
 
