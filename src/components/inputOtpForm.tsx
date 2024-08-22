@@ -53,7 +53,6 @@ const InputOTPForm: React.FC<InputOTPFormProps> = ({ userName, id }) => {
       });
       navigate("/");
     } catch (error: any) {
-      console.log(error);
       toast({
         title: "Authentication",
         description: error.response?.data.MESSAGE,
@@ -78,7 +77,7 @@ const InputOTPForm: React.FC<InputOTPFormProps> = ({ userName, id }) => {
                 <FormControl>
                   <InputOTP maxLength={6} {...field}>
                     <InputOTPGroup>
-                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={0} autoFocus/>
                       <InputOTPSlot index={1} />
                       <InputOTPSlot index={2} />
                       <InputOTPSlot index={3} />

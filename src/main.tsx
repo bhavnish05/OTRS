@@ -10,6 +10,7 @@ import Protected from "./pages/protected";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Ticket from "./pages/ticket";
+import MaintainancePage from "./pages/maintainance";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +30,10 @@ const router = createBrowserRouter([
         element: <AuthGuard children={<Ticket />} />,
       },
     ],
+  },
+  {
+    path: "/maintenance",
+    element: <MaintainancePage />,
   },
 ]);
 

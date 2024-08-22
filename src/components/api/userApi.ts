@@ -4,3 +4,7 @@ import { AxiosResponse } from "axios";
 export const getUsers = async (): Promise<AxiosResponse> => {
   return axiosInstance.get("/user_group_list");
 };
+
+export const getLoggedUsers = async (): Promise<AxiosResponse> => {
+  return axiosInstance.get("http://10.101.104.140:8090/logged_in_users");
+};

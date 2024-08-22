@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-
 import { TicketDetails } from "@/lib/types";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,6 +39,7 @@ import {
   assignTicket,
   closeTicket,
   getTicketDetails,
+  markFalsePositive,
 } from "@/components/api/ticketsApi";
 import ResolutionTab from "@/components/resolution-tab";
 import AuditTab from "@/components/audit-tab";
@@ -46,11 +50,14 @@ import {
   BookOpenText,
   BookText,
   Check,
+  Download,
   PencilLine,
+  Printer,
   User,
   Users,
   XCircle,
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 const headerFields: string[] = [
   "ticket_id",
@@ -89,6 +96,7 @@ const Ticket = () => {
     try {
       const response = await getTicketDetails(id);
       setTicketDetails(response.data);
+      console.log(response.data);
     } catch (error) {
       toast({
         title: "Ticket Details",
@@ -127,7 +135,7 @@ const Ticket = () => {
   };
 
   const handleAssign = async () => {
-    if (!assignType || !assignToGroup || !assignToUser) {
+    if (!assignType) {
       toast({
         title: "Ticket Assignment",
         description: "Please select a valid user or group.",
@@ -139,9 +147,14 @@ const Ticket = () => {
           assignType,
           assignToGroup,
           assignToUser,
-          parseInt(ticketDetails?.ticket_id!),
-          id!
+          ticketDetails?.ticket_id!
         );
+
+        toast({
+          title: "Ticket Assignment",
+          description: "Ticket Assigned Succesfully",
+          variant: "destructive",
+        });
       } catch (error) {
         toast({
           title: "Ticket Assignment",
@@ -165,8 +178,52 @@ const Ticket = () => {
     }
   };
 
+  const printPDF = async () => {
+    const input = document.getElementById("contentToPrint");
+    if (!input) return;
+
+    try {
+      const canvas = await html2canvas(input, { scale: 3 });
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF();
+
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+
+      let position = 0;
+
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save("document.pdf");
+    } catch (error) {
+      console.error("Error generating PDF", error);
+    }
+  };
+
+  const handleFalsePositive = async (value: boolean) => {
+    try {
+      if (value) await markFalsePositive(ticketDetails?.ticket_id!);
+    } catch (error) {
+      toast({
+        title: "False Positive",
+        description: "Failed to mark the ticket as false positive.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="p-4">
+    <div className="p-4" id="contentToPrint">
       <div className="grid grid-cols-3 gap-3 p-4 rounded-md border bg-muted">
         {ticketDetails &&
           headerFields.map(
@@ -201,43 +258,59 @@ const Ticket = () => {
               <p>Audit</p>
             </TabsTrigger>
           </TabsList>
-          <AlertDialog>
-            <AlertDialogTrigger>
-              <Button
-                disabled={
-                  ticketDetails?.username !== ticketDetails?.bucket ||
-                  ticketDetails?.status === "closed"
-                }
-                className="float-end flex gap-3 items-center"
-                variant="destructive"
-              >
-                <p>Close Ticket</p>
-                <XCircle className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action will close this ticket.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-destructive"
-                  onClick={handleTicketClose}
+
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-1 items-end">
+              <p className="text-[10px] font-semibold text-muted-foreground">
+                Mark as false positive
+              </p>
+              <Switch onCheckedChange={handleFalsePositive} />
+            </div>
+            <Button className="" onClick={printPDF}>
+              <Printer className="h-4 w-4" />
+            </Button>
+
+            <AlertDialog>
+              <AlertDialogTrigger>
+                <Button
+                  disabled={
+                    ticketDetails?.username !== ticketDetails?.bucket ||
+                    ticketDetails?.status === "closed"
+                  }
+                  className="float-end flex gap-3 items-center"
+                  variant="destructive"
                 >
-                  Close
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                  <p>Close Ticket</p>
+                  <XCircle className="h-4 w-4" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action will close this ticket.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-destructive"
+                    onClick={handleTicketClose}
+                  >
+                    Close
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
 
         <div className="p-4 bg-muted rounded-md border">
           <TabsContent value="description">
-            <DescriptionTab ticketDetails={ticketDetails!} />
+            <DescriptionTab
+              ticketDetails={ticketDetails!}
+              fetchTicketDetails={handleFetchTicketDetails}
+            />
           </TabsContent>
 
           <TabsContent value="resolution">

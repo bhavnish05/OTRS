@@ -25,7 +25,7 @@ const Home = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <KPI />
+      <KPI tickets={tableData} />
       <div className="px-4">
         <DataTable columns={columns} data={tableData} />
       </div>

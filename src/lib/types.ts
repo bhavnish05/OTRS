@@ -14,6 +14,7 @@ export type Tickets = {
   description: string;
   severity: string;
   sla_due: string;
+  sla_start: string;
   priority: string;
   data: string;
   raised_by_id: string;
@@ -51,7 +52,7 @@ export type TicketDetails = {
   severity: string;
   sla_due: string;
   status: string;
-  ticket_id: string;
+  ticket_id: number;
   customer_name: string;
   title: string;
   type: string;

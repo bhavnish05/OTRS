@@ -38,10 +38,9 @@ export const assignTicket = async (
   assignType: string,
   assignToGroup: string,
   assignToUser: string,
-  ticketId: number,
-  id: string
+  ticketId: number
 ): Promise<AxiosResponse> => {
-  return axiosInstance.post(`/assign_ticket/${id}`, {
+  return axiosInstance.post(`/assign_ticket/${ticketId}`, {
     assignType,
     assignToGroup,
     assignToUser,
@@ -66,4 +65,19 @@ export const uploadDocument = async (file: string | Blob | null) => {
   formData.append("file", file!);
 
   return axiosInstance.post("/file_upload", formData);
+};
+
+export const updateDescription = async (
+  ticket_id: number,
+  description: string
+): Promise<AxiosResponse> => {
+  return axiosInstance.put(`/update_ticket_description/${ticket_id}`, {
+    description,
+  });
+};
+
+export const markFalsePositive = async (
+  ticket_id: number
+): Promise<AxiosResponse> => {
+  return axiosInstance.post(`/false_positive_ticket/${ticket_id}`, {});
 };

@@ -22,10 +22,17 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   (error) => {
-    if (error.response.status === 401) {
-      removeToken()
-      window.location.href = new URL("/login", window.origin).toString();
+    if (!error.response) {
+      // window.location.href = new URL("/maintenance", window.origin).toString();
+    } else {
+      if (error.response.status === 401) {
+        removeToken();
+        window.location.href = new URL("/login", window.origin).toString();
+      } else {
+        console.error("API Error", error.response.data);
+      }
     }
+
     return Promise.reject(error);
   }
 );

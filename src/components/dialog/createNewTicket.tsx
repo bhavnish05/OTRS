@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -29,6 +29,10 @@ import {
   FormMessage,
 } from "../ui/form";
 import { ScrollArea } from "../ui/scroll-area";
+import { Label } from "../ui/label";
+import {  XCircle } from "lucide-react";
+import { useToast } from "../ui/use-toast";
+import { fileToBase64 } from "@/lib/utils";
 import { createTicket } from "../api/ticketsApi";
 
 interface CreateNewTicketProps {
@@ -44,6 +48,7 @@ const formSchema = z.object({
     description: z.string().min(2).max(50),
   }),
   remarks: z.string().min(2).max(50),
+  attachments: z.array(z.object({ fileName: z.string(), base64: z.string() })),
 });
 
 const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
@@ -53,24 +58,73 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      ticketType: "SR",
+      ticketType: "",
       severity: "",
       ticketData: {
         title: "",
         description: "",
       },
       remarks: "",
+      attachments: [],
     },
   });
 
+  const { toast } = useToast();
+
+  const [uploadedFiles, setUploadedFiles] = useState<
+    { fileName: string; base64: string }[]
+  >([]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files ? e.target.files[0] : null;
+    if (selectedFile === null) {
+      toast({
+        title: "Document Upload",
+        description: "Please select a file before uploading.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    fileToBase64(selectedFile)
+      .then((base64String) => {
+        setUploadedFiles([
+          ...uploadedFiles,
+          { fileName: selectedFile.name, base64: base64String },
+        ]);
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const handleDeleteRes = (index: number) => {
+    setUploadedFiles((prev) => prev.filter((_, _index) => _index !== index));
+  };
+
   const handleCreateTicket = async (values: z.infer<typeof formSchema>) => {
     try {
-      await createTicket(values);
+      console.log(values);
+      const res = await createTicket(values);
+      console.log(res);  
       setDialogState();
+
+      form.reset();
+      setUploadedFiles([]);
+      
+      toast({
+        title: "Ticket Creation",
+        description: "Ticket created succesfully",
+        variant: "default",
+      });
+
+
     } catch (error) {
       console.error("Error creating ticket:", error);
     }
   };
+
+  useEffect(() => {
+    form.setValue("attachments", uploadedFiles);
+  }, [uploadedFiles]);
 
   return (
     <Dialog open={dialogState} onOpenChange={setDialogState}>
@@ -109,7 +163,6 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="severity"
@@ -132,7 +185,6 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="ticketData.title"
@@ -146,7 +198,6 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="ticketData.description"
@@ -175,49 +226,24 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="severity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Unnamed</FormLabel>
-                    <Select onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Access Type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="user">User</SelectItem>
-                        <SelectItem value="group">Group</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="mt-2 flex flex-wrap gap-2">
+                {uploadedFiles.map((value, index) => (
+                  <div className="flex pr-1 mb-3" key={index}>
+                    <div className="relative group px-2 py-1 bg-primary rounded-md">
+                      <p className="text-xs">{value.fileName}</p>
+                      <XCircle
+                        className="absolute -top-1.5 -right-1.5 h-4 w-4 hidden group-hover:block cursor-pointer"
+                        onClick={() => handleDeleteRes(index)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
 
-              <FormField
-                control={form.control}
-                name="severity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Unnamed</FormLabel>
-                    <Select onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Access Type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="user-list">User-list</SelectItem>
-                        <SelectItem value="group-list">Group-list</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="flex flex-col space-y-3 mt-2">
+                <Label>Attachments</Label>
+                <Input id="file" type="file" onChange={handleFileChange} />
+              </div>
             </form>
           </Form>
         </ScrollArea>

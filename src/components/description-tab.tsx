@@ -4,12 +4,20 @@ import { TicketDetails } from "@/lib/types";
 import { BookOpenText, Pencil, Save, X } from "lucide-react";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
+import { updateDescription } from "./api/ticketsApi";
+import { useToast } from "./ui/use-toast";
 
 interface DescriptionTabProps {
   ticketDetails: TicketDetails;
+  fetchTicketDetails: () => void;
 }
 
-const DescriptionTab: React.FC<DescriptionTabProps> = ({ ticketDetails }) => {
+const DescriptionTab: React.FC<DescriptionTabProps> = ({
+  ticketDetails,
+  fetchTicketDetails,
+}) => {
+  const { toast } = useToast();
+
   const [edit, setEdit] = useState<boolean>(false);
   const [description, setDescription] = useState<string>(
     ticketDetails?.description
@@ -20,12 +28,19 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({ ticketDetails }) => {
     setDescription(ticketDetails?.description);
   }
 
-  async function handleUpdateDescription() {
+  const handleUpdateDescription = async () => {
     try {
+      await updateDescription(ticketDetails.ticket_id, description);
+      setEdit(false);
+      fetchTicketDetails();
     } catch (error) {
-      console.log(error);
+      toast({
+        title: "Ticket Description",
+        description: "Failed to update ticket description",
+        variant: "destructive",
+      });
     }
-  }
+  };
 
   return (
     <>
@@ -61,7 +76,7 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({ ticketDetails }) => {
               <X className="h-4 w-4" />
             </Button>
             <Button
-              onClick={handleUpdateDescription}
+              onClick={() => handleUpdateDescription()}
               className="flex gap-3 items-center"
             >
               <p>Save</p>
