@@ -33,13 +33,14 @@ import {
 } from "@/components/ui/select";
 
 import { useEffect, useState } from "react";
-import { ScrollArea } from "../ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "../ui/calendar";
 import { getCustomerDetails } from "../api/userApi";
 import { filterTickets } from "../api/ticketsApi";
+import { useSetAtom } from "jotai";
+import { ticketsAtom } from "@/lib/atoms";
 
 const formSchema = z.object({
   sort_by: z.string(),
@@ -65,6 +66,7 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
   setSheetState,
   sheetState,
 }) => {
+  const setTickets = useSetAtom(ticketsAtom);
   const [customers, setCustomers] = useState<any[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -75,8 +77,8 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
       customer_name: "",
       end_date: new Date(),
       severity: "",
-      sort_by: "",
-      sort_order: "",
+      sort_by: "ticket_id",
+      sort_order: "asc",
       start_date: new Date(),
       status: "",
       ticket_id: "",
@@ -87,15 +89,24 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const formattedValues = {
-        ...values,
-        start_date: new Date(values.start_date).toISOString().split('T')[0],
-        end_date: new Date(values.end_date).toISOString().split('T')[0],
-      };
-      const response = await filterTickets(formattedValues);
-      console.log(response.data);
+      const cleanedValues: { [key: string]: string | Date } =
+        Object.fromEntries(
+          Object.entries(values)
+            .filter(
+              ([key, value]) =>
+                value !== "" && value !== null && value !== undefined
+            )
+            .map(([key, value]) => {
+              if (key === "start_date" || key === "end_date") {
+                return [key, format(new Date(value), "yyyy-MM-dd")];
+              }
+              return [key, value];
+            })
+        );
+      const response = await filterTickets(cleanedValues);
+      setTickets(response.data.tickets)
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -114,16 +125,100 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
 
   return (
     <Dialog open={sheetState} onOpenChange={setSheetState}>
-      <DialogContent>
+      <DialogContent className="max-w-[1000px]">
         <DialogHeader>
           <DialogTitle>Filters</DialogTitle>
           <DialogDescription>Apply filters</DialogDescription>
-          <ScrollArea className="h-[500px]">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-3"
-              >
+
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-3 mt-4"
+            >
+              <div className="flex gap-2">
+                <FormField
+                  control={form.control}
+                  name="start_date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col w-full">
+                      <FormLabel>Created At</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild className="w-full">
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                          />
+                        </PopoverContent>
+                      </Popover>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="end_date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col w-full">
+                      <FormLabel>End Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) =>
+                              date > new Date() || date < new Date("1900-01-01")
+                            }
+                          />
+                        </PopoverContent>
+                      </Popover>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
                 <FormField
                   control={form.control}
                   name="title"
@@ -141,12 +236,44 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
 
                 <FormField
                   control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Breach Status</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Ex: Hacked" {...field} />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
                   name="ticket_id"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Ticket Id</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="420, 69" {...field} />
+                      </FormControl>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <FormField
+                  control={form.control}
+                  name="bucket"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bucket</FormLabel>
+                      <FormControl>
+                        <Input placeholder="L1, L2...." {...field} />
                       </FormControl>
 
                       <FormMessage />
@@ -175,21 +302,6 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
                           <SelectItem value="issue">Issue</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="bucket"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Bucket</FormLabel>
-                      <FormControl>
-                        <Input placeholder="L1, L2...." {...field} />
-                      </FormControl>
-
                       <FormMessage />
                     </FormItem>
                   )}
@@ -279,107 +391,13 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
                     </FormItem>
                   )}
                 />
+              </div>
 
-                <FormField
-                  control={form.control}
-                  name="start_date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Date of birth</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                          />
-                        </PopoverContent>
-                      </Popover>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="end_date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Date of birth</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
-                          />
-                        </PopoverContent>
-                      </Popover>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Breach Status</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ex: Hacked" {...field} />
-                      </FormControl>
-
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
+              <div className="flex justify-end mt-4">
                 <Button type="submit">Submit</Button>
-              </form>
-            </Form>
-          </ScrollArea>
+              </div>
+            </form>
+          </Form>
         </DialogHeader>
       </DialogContent>
     </Dialog>

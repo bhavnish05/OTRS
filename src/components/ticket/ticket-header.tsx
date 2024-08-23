@@ -32,12 +32,12 @@ const TicketHeader: React.FC<TicketHeaderProps> = ({ ticketDetails }) => {
           </p>
         </div>
 
-        <div className="mt-2 flex gap-2">
-          <div className="w-1/2 rounded-md border">
-            <p className="px-4 py-2 bg-muted text-xs text-muted-foreground">
-              Meta Details
-            </p>
-            <div className="p-4 grid grid-cols-2 gap-3">
+        <div className="rounded-md border mt-4">
+          <p className="px-4 py-2 bg-muted text-xs text-muted-foreground">
+            Meta Details
+          </p>
+          <div className="p-4 flex gap-4">
+            <div className="w-1/2 grid grid-cols-3 gap-3">
               {ticketDetails &&
                 headerFields.map(
                   (field) =>
@@ -53,27 +53,27 @@ const TicketHeader: React.FC<TicketHeaderProps> = ({ ticketDetails }) => {
                     )
                 )}
             </div>
-          </div>
 
-          <div className="flex flex-col gap-4 justify-center items-center w-1/2 ">
-            <div className="flex flex-col items-center gap-1">
-              <p className="text-muted-foreground font-bold text-[10px]">
-                RAISED AT
-              </p>
-              <Countdown
-                targetDate={ticketDetails.raised_at}
-                countdown={false}
-              />
-            </div>
+            <div className="w-1/2 flex flex-col gap-2 items-center justify-center border-s">
+              <div className="flex flex-col items-center">
+                <p className="text-muted-foreground font-bold text-[10px]">
+                  RAISED AT
+                </p>
+                <Countdown
+                  targetDate={ticketDetails.raised_at}
+                  countdown={false}
+                />
+              </div>
 
-            <div className="flex flex-col items-center gap-1">
-              <p className="text-muted-foreground font-bold text-[10px]">
-                SLA DUE
-              </p>
-              <Countdown
-                targetDate={ticketDetails.sla_due}
-                countdown={new Date(ticketDetails.sla_due) > new Date()}
-              />
+              <div className="flex flex-col items-center">
+                <p className="text-muted-foreground font-bold text-[10px]">
+                  SLA DUE
+                </p>
+                <Countdown
+                  targetDate={ticketDetails.sla_due}
+                  countdown={new Date(ticketDetails.sla_due) > new Date()}
+                />
+              </div>
             </div>
           </div>
         </div>

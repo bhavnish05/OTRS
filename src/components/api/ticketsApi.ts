@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import axiosInstance from "@/lib/axiosInstance";
 
 export const getTicketDetails = async (id: any): Promise<AxiosResponse> => {
@@ -18,7 +18,7 @@ export const closeTicket = async (id: string): Promise<AxiosResponse> => {
 export const filterTickets = async (
   ticketFilters: any
 ): Promise<AxiosResponse> => {
-  return axios.post("/filters", ticketFilters);
+  return axiosInstance.post("/filters", ticketFilters);
 };
 
 export const submitResolution = async (
