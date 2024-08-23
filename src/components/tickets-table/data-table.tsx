@@ -56,7 +56,7 @@ export function DataTable<TData, TValue>({
   const [searchField, setSearchField] = useState<string>("title");
   const [createNewTicketDialogState, setCreateNewTicketDialogState] =
     useState<boolean>(false);
-  const [filterSheetState, setFilterSheetState] = useState<boolean>(false);
+  const [filterDialogState, setFilterDialogState] = useState<boolean>(false);
 
   const table = useReactTable({
     data,
@@ -116,7 +116,7 @@ export function DataTable<TData, TValue>({
           <PlusCircle className="h-4 w-4" />
         </Button>
 
-        <Button onClick={() => setFilterSheetState(!filterSheetState)}>
+        <Button onClick={() => setFilterDialogState(!filterDialogState)}>
           Filter
         </Button>
 
@@ -227,8 +227,8 @@ export function DataTable<TData, TValue>({
       />
 
       <FilterSheet
-        sheetState={filterSheetState}
-        setSheetState={() => setFilterSheetState(!filterSheetState)}
+        dialogState={filterDialogState}
+        setDialogState={() => setFilterDialogState(!filterDialogState)}
       />
     </>
   );

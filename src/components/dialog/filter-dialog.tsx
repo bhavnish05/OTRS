@@ -58,13 +58,13 @@ const formSchema = z.object({
 });
 
 interface FilterSheetProps {
-  sheetState: boolean;
-  setSheetState: () => void;
+  dialogState: boolean;
+  setDialogState: () => void;
 }
 
 const FilterDialog: React.FC<FilterSheetProps> = ({
-  setSheetState,
-  sheetState,
+  dialogState,
+  setDialogState,
 }) => {
   const setTickets = useSetAtom(ticketsAtom);
   const [customers, setCustomers] = useState<any[]>([]);
@@ -89,7 +89,7 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      const cleanedValues: { [key: string]: string | Date } =
+      const cleanedValues: { [key: string]: string | number | Date } =
         Object.fromEntries(
           Object.entries(values)
             .filter(
@@ -100,11 +100,15 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
               if (key === "start_date" || key === "end_date") {
                 return [key, format(new Date(value), "yyyy-MM-dd")];
               }
+              if (key === "customer_id") {
+                return [key, parseInt(value as string)];
+              }
               return [key, value];
             })
         );
       const response = await filterTickets(cleanedValues);
-      setTickets(response.data.tickets)
+      setTickets(response.data.tickets);
+      setDialogState();
     } catch (error) {
       console.error(error);
     }
@@ -124,7 +128,7 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
   }, []);
 
   return (
-    <Dialog open={sheetState} onOpenChange={setSheetState}>
+    <Dialog open={dialogState} onOpenChange={setDialogState}>
       <DialogContent className="max-w-[1000px]">
         <DialogHeader>
           <DialogTitle>Filters</DialogTitle>
@@ -205,9 +209,6 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) =>
-                              date > new Date() || date < new Date("1900-01-01")
-                            }
                           />
                         </PopoverContent>
                       </Popover>
@@ -324,7 +325,7 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
                           {customers.map((user) => (
                             <SelectItem
                               key={user.customer_id}
-                              value={user.customer_id}
+                              value={user.customer_id.toString()}
                             >
                               {user.customer_id}
                             </SelectItem>
