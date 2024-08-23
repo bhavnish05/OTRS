@@ -30,7 +30,7 @@ import {
 } from "../ui/form";
 import { ScrollArea } from "../ui/scroll-area";
 import { Label } from "../ui/label";
-import {  XCircle } from "lucide-react";
+import { XCircle } from "lucide-react";
 import { useToast } from "../ui/use-toast";
 import { fileToBase64 } from "@/lib/utils";
 import { createTicket } from "../api/ticketsApi";
@@ -103,20 +103,15 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
   const handleCreateTicket = async (values: z.infer<typeof formSchema>) => {
     try {
       console.log(values);
-      const res = await createTicket(values);
-      console.log(res);  
+      await createTicket(values);
       setDialogState();
-
       form.reset();
       setUploadedFiles([]);
-      
       toast({
         title: "Ticket Creation",
         description: "Ticket created succesfully",
         variant: "default",
       });
-
-
     } catch (error) {
       console.error("Error creating ticket:", error);
     }

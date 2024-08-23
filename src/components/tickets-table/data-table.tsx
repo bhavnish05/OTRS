@@ -96,7 +96,11 @@ export function DataTable<TData, TValue>({
           </SelectTrigger>
           <SelectContent>
             {table.getAllColumns().map((column) => {
-              return <SelectItem value={column.id}>{column.id}</SelectItem>;
+              return (
+                <SelectItem key={column.id} value={column.id}>
+                  {column.id}
+                </SelectItem>
+              );
             })}
           </SelectContent>
         </Select>

@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { TicketDetails } from "@/lib/types";
 
 import { BookOpenText, Pencil, Save, X } from "lucide-react";
-import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
-import { updateDescription } from "./api/ticketsApi";
-import { useToast } from "./ui/use-toast";
+import { Textarea } from "../ui/textarea";
+import { Button } from "../ui/button";
+import { updateDescription } from "../api/ticketsApi";
+import { useToast } from "../ui/use-toast";
 
 interface DescriptionTabProps {
   ticketDetails: TicketDetails;
@@ -84,7 +84,7 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
             </Button>
           </div>
         )}
-        {!edit && ticketDetails?.username === ticketDetails?.bucket && (
+        {!edit && ticketDetails?.username === ticketDetails?.bucket && ticketDetails?.status !== 'closed' && (
           <Button
             onClick={() => setEdit(true)}
             className="flex gap-3 items-center"

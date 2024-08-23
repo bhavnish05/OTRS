@@ -5,19 +5,19 @@ import {
   downloadDocument,
   submitResolution,
   uploadDocument,
-} from "./api/ticketsApi";
+} from "../api/ticketsApi";
 
 import { Check, File, PencilLine, Plus, Upload, XCircle } from "lucide-react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { useToast } from "./ui/use-toast";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { useToast } from "../ui/use-toast";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ScrollArea } from "./ui/scroll-area";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface ResolutionTabProps {
   ticketDetails: TicketDetails;

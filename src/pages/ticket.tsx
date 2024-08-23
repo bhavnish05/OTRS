@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { TicketDetails } from "@/lib/types";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ResolutionTab from "@/components/ticket/resolution-tab";
+import AuditTab from "@/components/ticket/audit-tab";
+import DescriptionTab from "@/components/ticket/description-tab";
+import {
+  assignTicket,
+  closeTicket,
+  getTicketDetails,
+  markFalsePositive,
+} from "@/components/api/ticketsApi";
+import { getUsers } from "@/components/api/userApi";
 
-import { Button } from "@/components/ui/button";
+import { TicketDetails } from "@/lib/types";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,14 +27,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -34,38 +36,35 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getUsers } from "@/components/api/userApi";
 import {
-  assignTicket,
-  closeTicket,
-  getTicketDetails,
-  markFalsePositive,
-} from "@/components/api/ticketsApi";
-import ResolutionTab from "@/components/resolution-tab";
-import AuditTab from "@/components/audit-tab";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import DescriptionTab from "@/components/description-tab";
-import { PersonIcon } from "@radix-ui/react-icons";
 import {
   BookOpenText,
   BookText,
   Check,
-  Download,
   PencilLine,
   Printer,
   User,
   Users,
   XCircle,
 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
+import TicketHeader from "@/components/ticket/ticket-header";
 
 const headerFields: string[] = [
   "ticket_id",
+  "customer_id",
   "title",
   "type",
   "breach_status",
   "bucket",
-  "customer_id",
   "raised_by_id",
   "raised_at",
   "severity",
@@ -96,7 +95,6 @@ const Ticket = () => {
     try {
       const response = await getTicketDetails(id);
       setTicketDetails(response.data);
-      console.log(response.data);
     } catch (error) {
       toast({
         title: "Ticket Details",
@@ -112,17 +110,16 @@ const Ticket = () => {
 
   const handleUser = async (value: string) => {
     try {
+      const response = await getUsers();
       if (value === "user") {
         setSelectUser(true);
         setSelectGroup(false);
         setAssignType(value);
-        const response = await getUsers();
         setUsers(response.data.users);
       } else {
         setSelectGroup(true);
         setSelectUser(false);
         setAssignType(value);
-        const response = await getUsers();
         setGroups(response.data.groups);
       }
     } catch (error) {
@@ -224,7 +221,7 @@ const Ticket = () => {
 
   return (
     <div className="p-4" id="contentToPrint">
-      <div className="grid grid-cols-3 gap-3 p-4 rounded-md border bg-muted">
+      {/* <div className="grid grid-cols-3 gap-3 p-4 rounded-md border bg-muted">
         {ticketDetails &&
           headerFields.map(
             (field) =>
@@ -237,9 +234,10 @@ const Ticket = () => {
                 </span>
               )
           )}
-      </div>
+      </div> */}
+      <TicketHeader ticketDetails={ticketDetails!} />
 
-      <Tabs defaultValue="description" className="max-w-screen-2xl">
+      <Tabs defaultValue="description" className="mt-2">
         <div className="flex justify-between items-center">
           <TabsList className="my-2">
             <TabsTrigger
@@ -328,7 +326,7 @@ const Ticket = () => {
 
       <div className="bg-muted rounded-md border p-4 mt-2">
         <div className="flex gap-2 items-center">
-          <PersonIcon className="h-3 w-3" />
+          <Users className="h-3 w-3" />
           <p className="text-xs font-bold text-muted-foreground">Assign</p>
         </div>
 

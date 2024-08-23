@@ -6,8 +6,8 @@ export default function MaintainancePage() {
   return (
     <div className="flex flex-col h-full w-full justify-center items-center">
       <p className="text-3xl font-extrabold">Server is under maintainance</p>
-      <p className="text-muted-foreground mt-2">Check out after some time!</p>
-      <Button onClick={() => navigate("/")}>Home</Button>
+      <p className="text-muted-foreground">Check out after some time!</p>
+      <Button onClick={() => navigate("/")} className="mt-4">Home</Button>
     </div>
   );
 }

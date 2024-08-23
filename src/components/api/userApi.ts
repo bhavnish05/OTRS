@@ -8,3 +8,7 @@ export const getUsers = async (): Promise<AxiosResponse> => {
 export const getLoggedUsers = async (): Promise<AxiosResponse> => {
   return axiosInstance.get("http://10.101.104.140:8090/logged_in_users");
 };
+
+export const getCustomerDetails = async (): Promise<AxiosResponse> => {
+  return axiosInstance.get("http://10.101.104.140:8090/customer_details");
+};

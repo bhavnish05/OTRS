@@ -23,7 +23,7 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (!error.response) {
-      // window.location.href = new URL("/maintenance", window.origin).toString();
+      window.location.href = new URL("/maintenance", window.origin).toString();
     } else {
       if (error.response.status === 401) {
         removeToken();

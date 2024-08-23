@@ -1,7 +1,7 @@
 import { TicketDetails } from "@/lib/types";
 
 import { BookText, Clock } from "lucide-react";
-import { ScrollArea } from "./ui/scroll-area";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface AuditTabProps {
   ticketDetails: TicketDetails;
