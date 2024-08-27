@@ -101,8 +101,17 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
   };
 
   const handleSubmitResolution = async () => {
+    const jsonString = JSON.stringify(uploadedFiles);
+
+    if (resolution.trim() === "") {
+      toast({
+        title: "Resolution Submission",
+        description: "Description cannot be empty",
+        variant: "destructive",
+      });
+      return;
+    }
     try {
-      const jsonString = JSON.stringify(uploadedFiles);
       await submitResolution(
         jsonString,
         ticketDetails.ticket_id,
@@ -113,6 +122,13 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
       fetchTicketDetails();
       setUploadedFiles([]);
       setResolution("");
+
+      toast({
+        title: "Resolution Submission",
+        description: "Your resolution has been submitted successfully.",
+        variant: "default",
+      });
+      
     } catch (error) {
       toast({
         title: "Resolution Submission",

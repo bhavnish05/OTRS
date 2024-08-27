@@ -59,7 +59,7 @@ const KPI: React.FC<KPIProps> = ({ tickets }) => {
   ];
 
   return (
-    <div className="p-4 flex gap-10 items-center">
+    <div className="p-4 flex gap-10 items-center flex-wrap">
       {kpis.map((kpi, index) => (
         <div
           className={`px-4 py-2 min-w-[180px] rounded-md border border-muted ${

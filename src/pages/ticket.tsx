@@ -111,6 +111,8 @@ const Ticket = () => {
   const handleUser = async (value: string) => {
     try {
       const response = await getUsers();
+     
+      
       if (value === "user") {
         setSelectUser(true);
         setSelectGroup(false);
@@ -150,7 +152,7 @@ const Ticket = () => {
         toast({
           title: "Ticket Assignment",
           description: "Ticket Assigned Succesfully",
-          variant: "destructive",
+          variant: "default",
         });
       } catch (error) {
         toast({

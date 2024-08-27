@@ -1,10 +1,16 @@
 import React, { useState } from "react";
 import { TicketDetails } from "@/lib/types";
 
-import { BookOpenText, Pencil, Save, X } from "lucide-react";
-import { Textarea } from "../ui/textarea";
+import { BookOpenText, File, Pencil, Save, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { updateDescription } from "../api/ticketsApi";
+import { Textarea } from "../ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { downloadDocument, updateDescription } from "../api/ticketsApi";
 import { useToast } from "../ui/use-toast";
 
 interface DescriptionTabProps {
@@ -28,12 +34,42 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
     setDescription(ticketDetails?.description);
   }
 
+  const handleDownloadDocument = async (document_name: string) => {
+    try {
+      const response = await downloadDocument(document_name);
+      if (response.status === 200 && response.data instanceof ArrayBuffer) {
+        const arrayBuffer = response.data;
+        const blob = new Blob([arrayBuffer], { type: "application/pdf" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = document_name;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        throw new Error("Unexpected response status or data format");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Download Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleUpdateDescription = async () => {
     try {
-      await updateDescription(ticketDetails.ticket_id, description);
+      const response = await updateDescription(ticketDetails.ticket_id, description);
+      console.log(response);
+      
       setEdit(false);
       fetchTicketDetails();
     } catch (error) {
+      
+      
       toast({
         title: "Ticket Description",
         description: "Failed to update ticket description",
@@ -44,9 +80,29 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
 
   return (
     <>
-      <div className="flex items-center gap-2">
-        <BookOpenText className="h-4 w-4 text-muted-foreground" />
-        <p className="text-xs font-bold text-muted-foreground">Description</p>
+      <div>
+        <div className="flex items-center gap-2">
+          <BookOpenText className="h-4 w-4 text-muted-foreground" />
+          <p className="text-xs font-bold text-muted-foreground">Description</p>
+        </div>
+
+        {/* {ticketDetails.file_paths.map((file, index) => (
+          <TooltipProvider>
+            <Tooltip key={index}>
+              <TooltipTrigger asChild>
+                <span
+                  className="cursor-pointer border border-muted p-1 hover:bg-muted rounded-md"
+                  onClick={() => handleDownloadDocument(file)}
+                >
+                  <File className="h-3 w-3" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{file}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ))} */}
       </div>
       <div className="mt-4 flex flex-col gap-2 items-end">
         {edit ? (
@@ -84,16 +140,18 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
             </Button>
           </div>
         )}
-        {!edit && ticketDetails?.username === ticketDetails?.bucket && ticketDetails?.status !== 'closed' && (
-          <Button
-            onClick={() => setEdit(true)}
-            className="flex gap-3 items-center"
-            variant="outline"
-          >
-            <p>Edit</p>
-            <Pencil className="h-4 w-4" />
-          </Button>
-        )}
+        {!edit &&
+          ticketDetails?.username === ticketDetails?.bucket &&
+          ticketDetails?.status !== "closed" && (
+            <Button
+              onClick={() => setEdit(true)}
+              className="flex gap-3 items-center"
+              variant="outline"
+            >
+              <p>Edit</p>
+              <Pencil className="h-4 w-4" />
+            </Button>
+          )}
       </div>
     </>
   );

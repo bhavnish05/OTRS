@@ -32,8 +32,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Label } from "../ui/label";
 import { XCircle } from "lucide-react";
 import { useToast } from "../ui/use-toast";
-import { fileToBase64 } from "@/lib/utils";
-import { createTicket } from "../api/ticketsApi";
+import { createTicket, uploadDocument } from "../api/ticketsApi";
 
 interface CreateNewTicketProps {
   dialogState: boolean;
@@ -48,7 +47,7 @@ const formSchema = z.object({
     description: z.string().min(2).max(50),
   }),
   remarks: z.string().min(2).max(50),
-  attachments: z.array(z.object({ fileName: z.string(), base64: z.string() })),
+  filePath: z.array(z.string()),
 });
 
 const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
@@ -65,17 +64,15 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
         description: "",
       },
       remarks: "",
-      attachments: [],
+      filePath: [],
     },
   });
 
   const { toast } = useToast();
 
-  const [uploadedFiles, setUploadedFiles] = useState<
-    { fileName: string; base64: string }[]
-  >([]);
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files ? e.target.files[0] : null;
     if (selectedFile === null) {
       toast({
@@ -86,14 +83,24 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
       return;
     }
 
-    fileToBase64(selectedFile)
-      .then((base64String) => {
-        setUploadedFiles([
-          ...uploadedFiles,
-          { fileName: selectedFile.name, base64: base64String },
-        ]);
-      })
-      .catch((error) => console.log(error));
+    try {
+      const response = await uploadDocument(selectedFile);
+      setUploadedFiles((prevFiles) => [
+        ...prevFiles,
+        response.data.new_filename,
+      ]);
+      toast({
+        title: "Document Upload",
+        description: "Document uploaded successfully.",
+        variant: "default",
+      });
+    } catch (error) {
+      toast({
+        title: "Document Upload",
+        description: "Failed to upload document to the server.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteRes = (index: number) => {
@@ -102,10 +109,9 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
 
   const handleCreateTicket = async (values: z.infer<typeof formSchema>) => {
     try {
-      console.log(values);
       await createTicket(values);
-      setDialogState();
       form.reset();
+      setDialogState();
       setUploadedFiles([]);
       toast({
         title: "Ticket Creation",
@@ -118,7 +124,7 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
   };
 
   useEffect(() => {
-    form.setValue("attachments", uploadedFiles);
+    form.setValue("filePath", uploadedFiles);
   }, [uploadedFiles]);
 
   return (
@@ -225,7 +231,7 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
                 {uploadedFiles.map((value, index) => (
                   <div className="flex pr-1 mb-3" key={index}>
                     <div className="relative group px-2 py-1 bg-primary rounded-md">
-                      <p className="text-xs">{value.fileName}</p>
+                      <p className="text-xs">{value}</p>
                       <XCircle
                         className="absolute -top-1.5 -right-1.5 h-4 w-4 hidden group-hover:block cursor-pointer"
                         onClick={() => handleDeleteRes(index)}
