@@ -35,7 +35,7 @@ export type TicketDetails = {
   data: string;
   description: string;
   eventLog: { event_description: string; event_datetime: string }[];
-  file_paths: string;
+  file_paths: string[];
   raised_at: string;
   raised_by_id: number;
   resolutions: {

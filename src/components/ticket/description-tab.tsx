@@ -51,10 +51,10 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
       } else {
         throw new Error("Unexpected response status or data format");
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Download Failed",
-        description: error.message,
+        description: "Failed to download the file.",
         variant: "destructive",
       });
     }
@@ -62,14 +62,15 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
 
   const handleUpdateDescription = async () => {
     try {
-      const response = await updateDescription(ticketDetails.ticket_id, description);
+      const response = await updateDescription(
+        ticketDetails.ticket_id,
+        description
+      );
       console.log(response);
-      
+
       setEdit(false);
       fetchTicketDetails();
     } catch (error) {
-      
-      
       toast({
         title: "Ticket Description",
         description: "Failed to update ticket description",
@@ -80,31 +81,32 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
 
   return (
     <>
-      <div>
+      <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <BookOpenText className="h-4 w-4 text-muted-foreground" />
           <p className="text-xs font-bold text-muted-foreground">Description</p>
         </div>
 
-        {/* {ticketDetails.file_paths.map((file, index) => (
-          <TooltipProvider>
-            <Tooltip key={index}>
-              <TooltipTrigger asChild>
-                <span
-                  className="cursor-pointer border border-muted p-1 hover:bg-muted rounded-md"
-                  onClick={() => handleDownloadDocument(file)}
-                >
-                  <File className="h-3 w-3" />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{file}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ))} */}
+        {ticketDetails &&
+          ticketDetails.file_paths.map((file, index) => (
+            <TooltipProvider>
+              <Tooltip key={index}>
+                <TooltipTrigger asChild>
+                  <span
+                    className="cursor-pointer border border-muted p-1 hover:bg-muted rounded-md"
+                    onClick={() => handleDownloadDocument(file)}
+                  >
+                    <File className="h-4 w-4" />
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{file}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ))}
       </div>
-      <div className="mt-4 flex flex-col gap-2 items-end">
+      <div className="mt-3 flex flex-col gap-2 items-end">
         {edit ? (
           <Textarea
             className="bg-background"

@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { logout, removeToken } from "./api/authApi";
 
-import { LogOut } from "lucide-react";
+import { BellRing, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Popover,
@@ -35,7 +35,16 @@ const TopBar = () => {
         OTRS
       </Link>
 
-      <div className="flex gap-4 items-center">
+      <div className="flex gap-6 items-center">
+        {/* <Popover>
+          <PopoverTrigger asChild>
+            <BellRing className="h-5 w-5" />
+          </PopoverTrigger>
+          <PopoverContent className="w-80">
+            <div className="grid gap-4"> hello notifications</div>
+          </PopoverContent>
+        </Popover> */}
+
         <ModeToggle />
         <Popover>
           <PopoverTrigger asChild>

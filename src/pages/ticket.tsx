@@ -94,6 +94,8 @@ const Ticket = () => {
   async function handleFetchTicketDetails() {
     try {
       const response = await getTicketDetails(id);
+      console.log(response);
+      
       setTicketDetails(response.data);
     } catch (error) {
       toast({
@@ -142,12 +144,15 @@ const Ticket = () => {
       });
     } else {
       try {
-        await assignTicket(
+       const res = await assignTicket(
           assignType,
           assignToGroup,
           assignToUser,
           ticketDetails?.ticket_id!
         );
+
+        console.log(res);
+        
 
         toast({
           title: "Ticket Assignment",
@@ -211,7 +216,11 @@ const Ticket = () => {
 
   const handleFalsePositive = async (value: boolean) => {
     try {
-      if (value) await markFalsePositive(ticketDetails?.ticket_id!);
+      if (value){
+      const response = await markFalsePositive(ticketDetails?.ticket_id!);
+      console.log(response);
+      
+      } 
     } catch (error) {
       toast({
         title: "False Positive",
@@ -270,8 +279,9 @@ const Ticket = () => {
               <Printer className="h-4 w-4" />
             </Button>
 
-            <AlertDialog>
-              <AlertDialogTrigger>
+            <AlertDialog >
+              <AlertDialogTrigger disabled={ticketDetails?.username !== ticketDetails?.bucket ||
+                    ticketDetails?.status === "closed"}>
                 <Button
                   disabled={
                     ticketDetails?.username !== ticketDetails?.bucket ||
@@ -363,11 +373,12 @@ const Ticket = () => {
               </SelectTrigger>
               <SelectContent>
                 {users.map((value, index) => (
-                  <SelectItem value={value.username} key={index}>
+                  <SelectItem value={value.username} key={index} disabled={value.username === ticketDetails?.username}>
                     <span className="flex gap-2 items-center">
                       <User className="h-4 w-4" />
                       <p>{value.username}</p>
                     </span>
+      
                   </SelectItem>
                 ))}
               </SelectContent>

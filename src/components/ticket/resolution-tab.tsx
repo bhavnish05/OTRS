@@ -53,10 +53,10 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
       } else {
         throw new Error("Unexpected response status or data format");
       }
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Download Failed",
-        description: error.message,
+        description: "Failed to download the file.",
         variant: "destructive",
       });
     }

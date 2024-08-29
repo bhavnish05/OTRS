@@ -1,5 +1,7 @@
 import { TicketDetails } from "@/lib/types";
 import Countdown from "../countdown";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const headerFields: string[] = [
   "customer_id",
@@ -14,12 +16,18 @@ interface TicketHeaderProps {
   ticketDetails: TicketDetails;
 }
 
-const TicketHeader: React.FC<TicketHeaderProps> = ({ ticketDetails }) => {
+
+const TicketHeader: React.FC<TicketHeaderProps> = ({ ticketDetails}) => {
+
+  const navigate = useNavigate()
+
   return (
     ticketDetails && (
       <div>
         <div id="ticket_title" className="flex gap-4 items-center top-0 sticky">
+        <ArrowLeft className=" h-4 w-4 cursor-pointer" onClick={() => navigate(-1)} />
           <span className="flex gap-2 font-bold text-3xl">
+         
             <p>{ticketDetails.ticket_id}.</p>
             <p>{ticketDetails.title}</p>
           </span>
