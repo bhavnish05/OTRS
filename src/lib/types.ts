@@ -26,6 +26,10 @@ export type Tickets = {
   assignedToMe: boolean;
 };
 
+export type Username = {
+  username:string;
+}
+
 export type TicketDetails = {
   breach_status: string;
   bucket: string;

@@ -82,6 +82,17 @@ export const updateDescription = async (
   });
 };
 
+export const downloadTicket = async (
+  ticket_id: any
+): Promise<AxiosResponse<ArrayBuffer>> => {
+  return axiosInstance.get(
+    `/export_ticket/${ticket_id}`,
+    {
+      responseType: "arraybuffer"
+    }
+  );
+};
+
 export const markFalsePositive = async (
   ticket_id: number
 ): Promise<AxiosResponse> => {

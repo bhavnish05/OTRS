@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+
 
 import ResolutionTab from "@/components/ticket/resolution-tab";
 import AuditTab from "@/components/ticket/audit-tab";
@@ -9,6 +8,7 @@ import DescriptionTab from "@/components/ticket/description-tab";
 import {
   assignTicket,
   closeTicket,
+  downloadTicket,
   getTicketDetails,
   markFalsePositive,
 } from "@/components/api/ticketsApi";
@@ -95,7 +95,7 @@ const Ticket = () => {
     try {
       const response = await getTicketDetails(id);
       console.log(response);
-      
+
       setTicketDetails(response.data);
     } catch (error) {
       toast({
@@ -113,8 +113,7 @@ const Ticket = () => {
   const handleUser = async (value: string) => {
     try {
       const response = await getUsers();
-     
-      
+
       if (value === "user") {
         setSelectUser(true);
         setSelectGroup(false);
@@ -144,7 +143,7 @@ const Ticket = () => {
       });
     } else {
       try {
-       const res = await assignTicket(
+        const res = await assignTicket(
           assignType,
           assignToGroup,
           assignToUser,
@@ -152,7 +151,6 @@ const Ticket = () => {
         );
 
         console.log(res);
-        
 
         toast({
           title: "Ticket Assignment",
@@ -183,44 +181,40 @@ const Ticket = () => {
   };
 
   const printPDF = async () => {
-    const input = document.getElementById("contentToPrint");
-    if (!input) return;
-
+    const s = ticketDetails?.ticket_id.toString();
     try {
-      const canvas = await html2canvas(input, { scale: 3 });
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF();
+      const response = await downloadTicket(ticketDetails?.ticket_id);
+      if (response.status === 200 && response.data instanceof ArrayBuffer) {
+        const arrayBuffer = response.data;
+        const blob = new Blob([arrayBuffer], { type: "application/pdf" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = s;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
 
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 295;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-
-      let position = 0;
-
-      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      
+      } else {
+        throw new Error("Unexpected response status or data format");
       }
-
-      pdf.save("document.pdf");
     } catch (error) {
-      console.error("Error generating PDF", error);
+      toast({
+        title: "Download Failed",
+        description: "Failed to download the file.",
+        variant: "destructive",
+      });
     }
   };
 
   const handleFalsePositive = async (value: boolean) => {
     try {
-      if (value){
-      const response = await markFalsePositive(ticketDetails?.ticket_id!);
-      console.log(response);
-      
-      } 
+      if (value) {
+        const response = await markFalsePositive(ticketDetails?.ticket_id!);
+        console.log(response);
+      }
     } catch (error) {
       toast({
         title: "False Positive",
@@ -279,9 +273,13 @@ const Ticket = () => {
               <Printer className="h-4 w-4" />
             </Button>
 
-            <AlertDialog >
-              <AlertDialogTrigger disabled={ticketDetails?.username !== ticketDetails?.bucket ||
-                    ticketDetails?.status === "closed"}>
+            <AlertDialog>
+              <AlertDialogTrigger
+                disabled={
+                  ticketDetails?.username !== ticketDetails?.bucket ||
+                  ticketDetails?.status === "closed"
+                }
+              >
                 <Button
                   disabled={
                     ticketDetails?.username !== ticketDetails?.bucket ||
@@ -373,12 +371,15 @@ const Ticket = () => {
               </SelectTrigger>
               <SelectContent>
                 {users.map((value, index) => (
-                  <SelectItem value={value.username} key={index} disabled={value.username === ticketDetails?.username}>
+                  <SelectItem
+                    value={value.username}
+                    key={index}
+                    disabled={value.username === ticketDetails?.username}
+                  >
                     <span className="flex gap-2 items-center">
                       <User className="h-4 w-4" />
                       <p>{value.username}</p>
                     </span>
-      
                   </SelectItem>
                 ))}
               </SelectContent>

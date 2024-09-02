@@ -11,9 +11,13 @@ import {
 } from "@/components/ui/popover";
 import { ModeToggle } from "./mode-toggle";
 import { toast } from "./ui/use-toast";
+// import { usernameAtom } from "@/lib/atoms";
 
 const TopBar = () => {
   const navigate = useNavigate();
+
+  // const tickets = useAtomValue(ticketsAtom);
+  // const username = useAtomValue(usernameAtom)
 
   const handleLogout = async () => {
     try {
@@ -34,6 +38,10 @@ const TopBar = () => {
       <Link className="text-xl font-extrabold tracking-widest" to="/">
         OTRS
       </Link>
+   
+
+      {/* <p>{tickets.username}</p> */}
+      
 
       <div className="flex gap-6 items-center">
         {/* <Popover>
@@ -67,3 +75,7 @@ const TopBar = () => {
 };
 
 export default TopBar;
+function useAtomValue(ticketsAtom: any) {
+  throw new Error("Function not implemented.");
+}
+

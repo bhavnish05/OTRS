@@ -16,18 +16,20 @@ interface TicketHeaderProps {
   ticketDetails: TicketDetails;
 }
 
-
-const TicketHeader: React.FC<TicketHeaderProps> = ({ ticketDetails}) => {
-
-  const navigate = useNavigate()
+const TicketHeader: React.FC<TicketHeaderProps> = ({ ticketDetails }) => {
+  const navigate = useNavigate();
 
   return (
     ticketDetails && (
       <div>
         <div id="ticket_title" className="flex gap-4 items-center top-0 sticky">
-        <ArrowLeft className=" h-4 w-4 cursor-pointer" onClick={() => navigate(-1)} />
+          <div className="rounded-full hover:bg-slate-400 px-2 py-2 ">
+            <ArrowLeft
+              className=" h-4 w-4 cursor-pointer"
+              onClick={() => navigate(-1)}
+            />
+          </div>
           <span className="flex gap-2 font-bold text-3xl">
-         
             <p>{ticketDetails.ticket_id}.</p>
             <p>{ticketDetails.title}</p>
           </span>
