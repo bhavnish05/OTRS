@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import InputOTPForm from "@/components/inputOtpForm";
+import { Captcha } from "@/components/Captcha";
 
 const Login = () => {
   const { toast } = useToast();
@@ -24,7 +25,8 @@ const Login = () => {
 
   const [username, setUsername] = useState("");
   const [otpValidate, setOtpValidate] = useState(false);
-
+  const [captchaText, setCaptchaText] = useState("");
+  const [generatedCaptcha, setGeneratedCaptcha] = useState("");
   const [id, setId] = useState("");
 
   const formSchema = z.object({
@@ -39,13 +41,25 @@ const Login = () => {
       password: "",
     },
   });
-
+  const validateCaptcha = () => {
+    return captchaText.toUpperCase() === generatedCaptcha.toUpperCase();
+  };
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!validateCaptcha()) {
+      toast({
+        title: "Captcha Validation",
+        description: "invalid Captcha.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const response = await loginAPI(values);
       setUsername(values.username);
       setId(response.data.uniqueId);
       setOtpValidate(true);
+      localStorage.setItem("username", values.username);
       toast({
         title: "Authentication",
         description: "OTP has been sent.",
@@ -58,7 +72,12 @@ const Login = () => {
       });
     }
   };
-
+  const handleCaptchaChange = (text: string, captcha?: string) => {
+    setCaptchaText(text);
+    if (captcha) {
+      setGeneratedCaptcha(captcha);
+    }
+  };
   useEffect(() => {
     if (getToken()) navigate("/");
   }, []);
@@ -105,6 +124,7 @@ const Login = () => {
                     </FormItem>
                   )}
                 />
+                <Captcha onCaptchaChange={handleCaptchaChange} />
                 <Button type="submit">Login</Button>
               </form>
             </Form>

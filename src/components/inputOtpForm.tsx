@@ -71,13 +71,14 @@ const InputOTPForm: React.FC<InputOTPFormProps> = ({ userName, id }) => {
           <FormField
             control={form.control}
             name="pin"
+            
             render={({ field }) => (
               <FormItem>
                 <FormLabel>One-Time Password</FormLabel>
                 <FormControl>
                   <InputOTP maxLength={6} {...field}>
-                    <InputOTPGroup>
-                      <InputOTPSlot index={0} autoFocus/>
+                    <InputOTPGroup >
+                      <InputOTPSlot index={0} autoFocus />
                       <InputOTPSlot index={1} />
                       <InputOTPSlot index={2} />
                       <InputOTPSlot index={3} />

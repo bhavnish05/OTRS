@@ -36,6 +36,7 @@ import { createTicket, uploadDocument } from "../api/ticketsApi";
 import { useAtomValue } from "jotai";
 import { customersAtom} from "@/lib/atoms";
 
+
 interface CreateNewTicketProps {
   dialogState: boolean;
   setDialogState: () => void;
@@ -127,6 +128,8 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
         variant: "default",
       });
       history.go(0);
+
+    
     } catch (error) {
       console.error("Error creating ticket:", error);
     }

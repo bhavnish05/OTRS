@@ -38,25 +38,28 @@ const TopBar = () => {
       <Link className="text-xl font-extrabold tracking-widest" to="/">
         OTRS
       </Link>
-      <p className="float-right">Hello, {username}</p>
 
-      <div className="flex gap-6 items-center">
-        <ModeToggle />
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="icon">
-              <LogOut className="h-4 w-4 cursor-pointer " />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent>
-            <div className="flex justify-between items-center">
-              <p>Are you sure?</p>
-              <Button variant={"default"} onClick={handleLogout}>
-                OK
+      <div className="flex gap-4">
+        <p className="p-2 text-xs border rounded-md">Hello, {username}</p>
+
+        <div className="flex gap-4 items-center">
+          <ModeToggle />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="icon">
+                <LogOut className="h-4 w-4 cursor-pointer " />
               </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
+            </PopoverTrigger>
+            <PopoverContent>
+              <div className="flex justify-between items-center">
+                <p>Are you sure?</p>
+                <Button variant={"default"} onClick={handleLogout}>
+                  OK
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
     </div>
   );
