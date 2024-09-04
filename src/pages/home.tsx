@@ -1,33 +1,36 @@
-import { useEffect, useState } from "react";
+import { useEffect} from "react";
 
 import { columns } from "@/components/tickets-table/columns";
 import { DataTable } from "@/components/tickets-table/data-table";
 import { getTickets } from "@/components/api/dashboardApi";
 import KPI from "@/components/kpi";
 import { useAtomValue, useSetAtom } from "jotai";
-import { ticketsAtom, } from "@/lib/atoms";
+import { customersAtom, ticketsAtom, usernameAtom } from "@/lib/atoms";
+import { toast } from "@/components/ui/use-toast";
 
 const Home = () => {
   const setTickets = useSetAtom(ticketsAtom);
   const tickets = useAtomValue(ticketsAtom);
 
-  // const setUsername = useSetAtom(usernameAtom);
- 
+  const setUsername = useSetAtom(usernameAtom);
 
+  const setCustomers = useSetAtom(customersAtom);
 
   async function handleTicketsFetch() {
     try {
       const response = await getTickets();
-      console.log(response);
-      // setUsername(response.data.username);
+    
+      setUsername(response.data.username);
       setTickets(response.data.ticketId);
-
+      setCustomers(response.data.all_customers);
     } catch (error) {
-      console.log(error);
+      toast({
+        title: "Tickets",
+        description: "Unable to fetch Tickets.",
+        variant: "destructive",
+      });
     }
   }
-
-  
 
   useEffect(() => {
     handleTicketsFetch();

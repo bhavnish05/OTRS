@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-
 import ResolutionTab from "@/components/ticket/resolution-tab";
 import AuditTab from "@/components/ticket/audit-tab";
 import DescriptionTab from "@/components/ticket/description-tab";
@@ -57,20 +56,6 @@ import {
   XCircle,
 } from "lucide-react";
 import TicketHeader from "@/components/ticket/ticket-header";
-
-const headerFields: string[] = [
-  "ticket_id",
-  "customer_id",
-  "title",
-  "type",
-  "breach_status",
-  "bucket",
-  "raised_by_id",
-  "raised_at",
-  "severity",
-  "sla_due",
-  "status",
-];
 
 const Ticket = () => {
   const { toast } = useToast();
@@ -143,24 +128,27 @@ const Ticket = () => {
       });
     } else {
       try {
-        const res = await assignTicket(
+        await assignTicket(
           assignType,
           assignToGroup,
           assignToUser,
           ticketDetails?.ticket_id!
         );
 
-        console.log(res);
-
         toast({
           title: "Ticket Assignment",
           description: "Ticket Assigned Succesfully",
           variant: "default",
         });
-      } catch (error) {
+      } catch (error: any) {
+        const statusCode = error?.response?.status;
+        const message =
+          error?.response?.data?.msg || "Failed to assign ticket to a user";
+
         toast({
           title: "Ticket Assignment",
-          description: "Failed to assign ticket to an user",
+          description:
+            statusCode === 403 ? message : "Failed to assign ticket to a user",
           variant: "destructive",
         });
       }
@@ -190,13 +178,11 @@ const Ticket = () => {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = s;
+        a.download = s!;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
-
-      
       } else {
         throw new Error("Unexpected response status or data format");
       }
@@ -226,20 +212,6 @@ const Ticket = () => {
 
   return (
     <div className="p-4" id="contentToPrint">
-      {/* <div className="grid grid-cols-3 gap-3 p-4 rounded-md border bg-muted">
-        {ticketDetails &&
-          headerFields.map(
-            (field) =>
-              (ticketDetails as any)[field] !== undefined && (
-                <span className="" key={field}>
-                  <p className="text-[9px] font-extrabold text-muted-foreground uppercase">
-                    {field}
-                  </p>
-                  <p className="text-sm">{(ticketDetails as any)[field]}</p>
-                </span>
-              )
-          )}
-      </div> */}
       <TicketHeader ticketDetails={ticketDetails!} />
 
       <Tabs defaultValue="description" className="mt-2">

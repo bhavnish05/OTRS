@@ -32,15 +32,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-import { useEffect, useState } from "react";
+
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { Calendar } from "../ui/calendar";
-import { getCustomerDetails } from "../api/userApi";
+
 import { filterTickets } from "../api/ticketsApi";
-import { useSetAtom } from "jotai";
-import { ticketsAtom } from "@/lib/atoms";
+import { useAtomValue, useSetAtom } from "jotai";
+import { customersAtom, ticketsAtom } from "@/lib/atoms";
+import { toast } from "../ui/use-toast";
 
 const formSchema = z.object({
   sort_by: z.string(),
@@ -67,7 +68,9 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
   setDialogState,
 }) => {
   const setTickets = useSetAtom(ticketsAtom);
-  const [customers, setCustomers] = useState<any[]>([]);
+
+
+  const customers = useAtomValue(customersAtom);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -93,7 +96,7 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
         Object.fromEntries(
           Object.entries(values)
             .filter(
-              ([key, value]) =>
+              ([_, value]) =>
                 value !== "" && value !== null && value !== undefined
             )
             .map(([key, value]) => {
@@ -110,22 +113,15 @@ const FilterDialog: React.FC<FilterSheetProps> = ({
       setTickets(response.data.tickets);
       setDialogState();
     } catch (error) {
-      console.error(error);
+      toast({
+        title: "Filter Data",
+        description: "Unable to fetch data",
+        variant: "destructive",
+      });
     }
   }
 
-  async function handleFetchCustomers() {
-    try {
-      const response = await getCustomerDetails();
-      setCustomers(response.data.customers);
-    } catch (error) {
-      //add toast
-    }
-  }
 
-  useEffect(() => {
-    handleFetchCustomers();
-  }, []);
 
   return (
     <Dialog open={dialogState} onOpenChange={setDialogState}>

@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { logout, removeToken } from "./api/authApi";
 
-import { BellRing, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Popover,
@@ -11,13 +11,13 @@ import {
 } from "@/components/ui/popover";
 import { ModeToggle } from "./mode-toggle";
 import { toast } from "./ui/use-toast";
-// import { usernameAtom } from "@/lib/atoms";
+import { usernameAtom } from "@/lib/atoms";
+import { useAtomValue } from "jotai";
 
 const TopBar = () => {
   const navigate = useNavigate();
 
-  // const tickets = useAtomValue(ticketsAtom);
-  // const username = useAtomValue(usernameAtom)
+  const username = useAtomValue(usernameAtom);
 
   const handleLogout = async () => {
     try {
@@ -38,21 +38,9 @@ const TopBar = () => {
       <Link className="text-xl font-extrabold tracking-widest" to="/">
         OTRS
       </Link>
-   
-
-      {/* <p>{tickets.username}</p> */}
-      
+      <p className="float-right">Hello, {username}</p>
 
       <div className="flex gap-6 items-center">
-        {/* <Popover>
-          <PopoverTrigger asChild>
-            <BellRing className="h-5 w-5" />
-          </PopoverTrigger>
-          <PopoverContent className="w-80">
-            <div className="grid gap-4"> hello notifications</div>
-          </PopoverContent>
-        </Popover> */}
-
         <ModeToggle />
         <Popover>
           <PopoverTrigger asChild>
@@ -75,7 +63,3 @@ const TopBar = () => {
 };
 
 export default TopBar;
-function useAtomValue(ticketsAtom: any) {
-  throw new Error("Function not implemented.");
-}
-

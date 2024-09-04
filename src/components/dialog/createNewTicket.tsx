@@ -33,6 +33,8 @@ import { Label } from "../ui/label";
 import { XCircle } from "lucide-react";
 import { useToast } from "../ui/use-toast";
 import { createTicket, uploadDocument } from "../api/ticketsApi";
+import { useAtomValue } from "jotai";
+import { customersAtom} from "@/lib/atoms";
 
 interface CreateNewTicketProps {
   dialogState: boolean;
@@ -42,6 +44,7 @@ interface CreateNewTicketProps {
 const formSchema = z.object({
   ticketType: z.string().min(2).max(50),
   severity: z.string(),
+  customer_name:z.string(),
   ticketData: z.object({
     title: z.string().min(2).max(50),
     description: z.string().min(2).max(50),
@@ -59,6 +62,7 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
     defaultValues: {
       ticketType: "",
       severity: "",
+      customer_name:"",
       ticketData: {
         title: "",
         description: "",
@@ -68,11 +72,15 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
     },
   });
 
+  
+  const customers = useAtomValue(customersAtom)
+  
   const { toast } = useToast();
 
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    console.log(customers);
     const selectedFile = e.target.files ? e.target.files[0] : null;
     if (selectedFile === null) {
       toast({
@@ -118,6 +126,7 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
         description: "Ticket created succesfully",
         variant: "default",
       });
+      history.go(0);
     } catch (error) {
       console.error("Error creating ticket:", error);
     }
@@ -186,6 +195,35 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
                   </FormItem>
                 )}
               />
+
+
+
+              <FormField
+                control={form.control}
+                name="customer_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Customers</FormLabel>
+                    <Select onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select Customers" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+            
+                        {customers.map((value, index) =>(
+                          <SelectItem value={value.customer_name} key={index}>{value.customer_name}</SelectItem>
+                        ))}
+
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+
               <FormField
                 control={form.control}
                 name="ticketData.title"

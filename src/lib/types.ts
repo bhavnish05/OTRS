@@ -26,8 +26,10 @@ export type Tickets = {
   assignedToMe: boolean;
 };
 
-export type Username = {
-  username:string;
+export type Customers = {
+  customer_id : number;
+  customer_name:string;
+
 }
 
 export type TicketDetails = {
