@@ -7,7 +7,15 @@ import {
   uploadDocument,
 } from "../api/ticketsApi";
 
-import { Check, File, PencilLine, Plus, Upload, XCircle } from "lucide-react";
+import {
+  Check,
+ 
+  FileDown,
+ 
+  Plus,
+  Upload,
+  XCircle,
+} from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useToast } from "../ui/use-toast";
@@ -18,6 +26,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ScrollArea } from "../ui/scroll-area";
+import { Textarea } from "../ui/textarea";
 
 interface ResolutionTabProps {
   ticketDetails: TicketDetails;
@@ -79,6 +88,8 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
 
     try {
       const response = await uploadDocument(file);
+
+      
       startTransition(() => {
         setUploadedFiles((prevFiles) => [
           ...prevFiles,
@@ -128,7 +139,6 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
         description: "Your resolution has been submitted successfully.",
         variant: "default",
       });
-      
     } catch (error) {
       toast({
         title: "Resolution Submission",
@@ -145,11 +155,11 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
   return (
     <>
       <div className="flex items-center gap-2">
-        <PencilLine className="h-4 w-4 text-muted-foreground" />
-        <p className="text-xs font-bold text-muted-foreground">Resolutions</p>
+        {/* <PencilLine className="h-4 w-4 text-muted-foreground" />
+        <p className="text-xs font-bold text-muted-foreground">Resolutions</p> */}
       </div>
 
-      <ScrollArea className="w-full mt-4 p-3 h-[300px] border border-muted rounded-md bg-background">
+      <ScrollArea className="w-full mb-2 p-3 h-[300px] border border-muted rounded-md bg-background">
         <div className="flex flex-col gap-2">
           {ticketDetails?.resolutions.length !== 0 ? (
             ticketDetails?.resolutions.map((value, index) => (
@@ -157,11 +167,13 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
                 <p className="text-muted-foreground text-xs text-right w-[20px]">
                   {index + 1}.
                 </p>
+
                 <div
                   className="flex justify-between gap-2 border p-2 rounded-md w-full"
                   key={index}
                 >
                   <p className="text-xs">{value.description}</p>
+ 
 
                   <div className="flex gap-1">
                     {value.supporting_files.map((file, index) => (
@@ -172,7 +184,7 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
                               className="cursor-pointer border border-muted p-1 hover:bg-muted rounded-md"
                               onClick={() => handleDownloadDocument(file)}
                             >
-                              <File className="h-3 w-3" />
+                              <FileDown className="h-3 w-3" />
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -195,7 +207,7 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
         </div>
       </ScrollArea>
 
-      <div className="flex items-center gap-2 mt-4">
+      <div className="flex items-center gap-2 mt-2">
         <Plus className="h-4 w-4 text-muted-foreground" />
         <p className="text-xs font-bold text-muted-foreground">
           Add Resolutions
@@ -203,8 +215,8 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
       </div>
 
       <div className="flex flex-col gap-1 mt-2">
-        <Input
-          type="text"
+        <Textarea
+          className="bg-background"
           placeholder="Description"
           value={resolution}
           onChange={(e) => setResolution(e.target.value)}
@@ -224,7 +236,7 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
           ))}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 mb-2">
           <Input id="file" type="file" onChange={handleFileChange} />
           <Button
             disabled={

@@ -11,10 +11,10 @@ const AuditTab: React.FC<AuditTabProps> = ({ ticketDetails }) => {
   return (
     <>
       <span className="flex gap-2 items-center">
-        <BookText className="h-4 w-4 text-muted-foreground" />
-        <p className="text-xs font-bold text-muted-foreground">Audit</p>
+        {/* <BookText className="h-4 w-4 text-muted-foreground" />
+        <p className="text-xs font-bold text-muted-foreground">Audit</p> */}
       </span>
-      <ScrollArea className="mt-4 p-3 w-full h-[300px] bg-background rounded-md">
+      <ScrollArea className="mb-2 p-3 w-full h-[300px] bg-background rounded-md">
         <div className="flex flex-col gap-2">
           {ticketDetails?.eventLog.map((value, index) => (
             <div className="flex gap-2 items-center" key={index}>

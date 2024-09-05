@@ -79,9 +79,10 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
   const { toast } = useToast();
 
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [fileNames,setFileNames] = useState<string[]>([]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log(customers);
+
     const selectedFile = e.target.files ? e.target.files[0] : null;
     if (selectedFile === null) {
       toast({
@@ -94,6 +95,13 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
 
     try {
       const response = await uploadDocument(selectedFile);
+      console.log(response);
+
+      setFileNames((prevFileNames) =>[
+        ...prevFileNames,
+        response.data.filename,
+      ]);
+      
       setUploadedFiles((prevFiles) => [
         ...prevFiles,
         response.data.new_filename,
@@ -269,7 +277,7 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
               />
 
               <div className="mt-2 flex flex-wrap gap-2">
-                {uploadedFiles.map((value, index) => (
+                {fileNames.map((value, index) => (
                   <div className="flex pr-1 mb-3" key={index}>
                     <div className="relative group px-2 py-1 bg-primary rounded-md">
                       <p className="text-xs">{value}</p>

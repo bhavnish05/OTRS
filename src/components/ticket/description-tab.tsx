@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TicketDetails } from "@/lib/types";
 
-import { BookOpenText, File, Pencil, Save, X } from "lucide-react";
+import {FileDown, Pencil, Save, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import {
@@ -83,8 +83,8 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
     <>
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <BookOpenText className="h-4 w-4 text-muted-foreground" />
-          <p className="text-xs font-bold text-muted-foreground">Description</p>
+          {/* <BookOpenText className="h-4 w-4 text-muted-foreground" />
+          <p className="text-xs font-bold text-muted-foreground">Description</p> */}
         </div>
 
         {ticketDetails &&
@@ -93,10 +93,10 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
               <Tooltip key={index}>
                 <TooltipTrigger asChild>
                   <span
-                    className="cursor-pointer border border-muted p-1 hover:bg-muted rounded-md"
+                    className="cursor-pointer border border-muted pb-1 hover:bg-muted rounded-md "
                     onClick={() => handleDownloadDocument(file)}
                   >
-                    <File className="h-4 w-4" />
+                    <FileDown className="h-4 w-4" />
                   </span>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -106,7 +106,7 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
             </TooltipProvider>
           ))}
       </div>
-      <div className="mt-3 flex flex-col gap-2 items-end">
+      <div className="mb-2 flex flex-col gap-2 items-end">
         {edit ? (
           <Textarea
             className="bg-background"

@@ -7,7 +7,10 @@ import { pickupTicket } from "../api/ticketsApi";
 import { ArrowUpDown, ExternalLink } from "lucide-react";
 import { Button } from "../ui/button";
 
+
 export const columns: ColumnDef<Tickets>[] = [
+
+ 
   {
     accessorKey: "ticket_id",
     header: ({ column }) => {
@@ -17,7 +20,7 @@ export const columns: ColumnDef<Tickets>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Ticket ID
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          <ArrowUpDown className="ml-1 h-3 w-3" />
         </p>
       );
     },
@@ -35,7 +38,17 @@ export const columns: ColumnDef<Tickets>[] = [
   },
   {
     accessorKey: "customer_id",
-    header: "Customer ID",
+    header: ({column})=>{
+      return(
+        <p
+        className="text-xs flex gap-2 items-center cursor-pointer"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Customer ID
+        <ArrowUpDown className="ml-1 h-3 w-3" />
+      </p>
+      )
+    }
   },
   {
     accessorKey: "customer_name",
@@ -51,15 +64,45 @@ export const columns: ColumnDef<Tickets>[] = [
   },
   {
     accessorKey: "raised_at",
-    header: "Raised At",
+    header: ({column})=>{
+      return(
+        <p
+        className="text-xs flex gap-2 items-center cursor-pointer"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Raised At
+        <ArrowUpDown className="ml-1 h-3 w-3" />
+      </p>
+      )
+    }
   },
   {
     accessorKey: "sla_due",
-    header: "SLA-Due",
+    header: ({column})=>{
+      return(
+        <p
+        className="text-xs flex gap-2 items-center cursor-pointer"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        SLA Due
+        <ArrowUpDown className="ml-1 h-3 w-3" />
+      </p>
+      )
+    }
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: ({column})=>{
+      return(
+        <p
+        className="text-xs flex gap-2 items-center cursor-pointer"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Status
+        <ArrowUpDown className="ml-1 h-3 w-3" />
+      </p>
+      )
+    }
   },
   {
     accessorKey: "type",
@@ -67,15 +110,45 @@ export const columns: ColumnDef<Tickets>[] = [
   },
   {
     accessorKey: "severity",
-    header: "Severity",
+    header: ({column})=>{
+      return(
+        <p
+        className="text-xs flex gap-2 items-center cursor-pointer"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+       Severity
+        <ArrowUpDown className="ml-1 h-3 w-3"/>
+      </p>
+      )
+    }
   },
   {
     accessorKey: "bucket",
-    header: "Bucket",
+    header: ({column})=>{
+      return(
+        <p
+        className="text-xs flex gap-2 items-center cursor-pointer"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Bucket
+        <ArrowUpDown className="ml-1 h-3 w-3" />
+      </p>
+      )
+    }
   },
   {
     accessorKey: "canPick",
-    header: "",
+    header: ({column}) =>{
+      return(
+        <p
+        className="text-xs flex gap-2 items-center cursor-pointer"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+       
+        <ArrowUpDown className="ml-1 h-3 w-3" />
+      </p>
+      )
+    },
     cell: (data) => {
       const ticketId = data.row.original.ticket_id;
       const canPick = data.row.original.canPick;

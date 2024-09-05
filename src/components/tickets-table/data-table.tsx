@@ -35,7 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "../ui/button";
-import { ChevronDownIcon, PlusCircle } from "lucide-react";
+import { ChevronDownIcon, CircleX, PlusCircle } from "lucide-react";
 import { Input } from "../ui/input";
 import CreateNewTicket from "../dialog/createNewTicket";
 import FilterSheet from "../dialog/filter-dialog";
@@ -49,7 +49,12 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    {
+      id: "ticket_id",
+      desc: true,
+    },
+  ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
@@ -78,35 +83,41 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <div className="flex justify-between gap-4">
-        <Input
-          placeholder={`Filter ${searchField}`}
-          value={
-            (table.getColumn(searchField)?.getFilterValue() as string) ?? ""
-          }
-          onChange={(event) =>
-            table.getColumn(searchField)?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm capitalize"
-        />
+      <div className="flex gap-4 justify-start">
+        <div className="flex gap-2">
+          <Select onValueChange={setSearchField}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Fields" />
+            </SelectTrigger>
+            <SelectContent>
+              {table.getAllColumns().map((column) => {
+                return (
+                  <SelectItem key={column.id} value={column.id}>
+                    {column.id}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
 
-        <Select onValueChange={setSearchField}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Fields" />
-          </SelectTrigger>
-          <SelectContent>
-            {table.getAllColumns().map((column) => {
-              return (
-                <SelectItem key={column.id} value={column.id}>
-                  {column.id}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
+          <Input
+            placeholder={`Search ${searchField}`}
+            value={
+              (table.getColumn(searchField)?.getFilterValue() as string) ?? ""
+            }
+            onChange={(event) =>
+              table.getColumn(searchField)?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm capitalize"
+          />
+          <CircleX
+            className="mt-2  mr-10 cursor-pointer"
+            onClick={() => table.getColumn(searchField)?.setFilterValue("")}
+          />
+        </div>
 
         <Button
-          className="flex gap-2 items-center"
+          className="flex items-center"
           variant="outline"
           onClick={() =>
             setCreateNewTicketDialogState(!createNewTicketDialogState)
@@ -116,13 +127,9 @@ export function DataTable<TData, TValue>({
           <PlusCircle className="h-4 w-4" />
         </Button>
 
-        <Button onClick={() => setFilterDialogState(!filterDialogState)}>
-          Filter
-        </Button>
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button variant="outline" className="ml-4">
               Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -146,6 +153,13 @@ export function DataTable<TData, TValue>({
               })}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <Button
+          className=""
+          onClick={() => setFilterDialogState(!filterDialogState)}
+        >
+          Filter
+        </Button>
       </div>
 
       <div className="rounded-md border mt-4">

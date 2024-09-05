@@ -79,10 +79,16 @@ const TicketHeader: React.FC<TicketHeaderProps> = ({ ticketDetails }) => {
                 <p className="text-muted-foreground font-bold text-[10px]">
                   SLA DUE
                 </p>
-                <Countdown
+
+
+                {ticketDetails.username!== ticketDetails.bucket?(
+                  <p className="text-xl font-bold">00:00:00</p>
+                ):(
+                  <Countdown
                   targetDate={ticketDetails.sla_due}
                   countdown={new Date(ticketDetails.sla_due) > new Date()}
                 />
+                )}
               </div>
             </div>
           </div>

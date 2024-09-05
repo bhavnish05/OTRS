@@ -140,6 +140,9 @@ const Ticket = () => {
           description: "Ticket Assigned Succesfully",
           variant: "default",
         });
+
+        history.go(0);
+
       } catch (error: any) {
         const statusCode = error?.response?.status;
         const message =
@@ -285,7 +288,7 @@ const Ticket = () => {
           </div>
         </div>
 
-        <div className="p-4 bg-muted rounded-md border">
+        <div className="px-4 bg-muted rounded-md border">
           <TabsContent value="description">
             <DescriptionTab
               ticketDetails={ticketDetails!}

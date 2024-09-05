@@ -2,7 +2,7 @@ import { useEffect} from "react";
 
 import { columns } from "@/components/tickets-table/columns";
 import { DataTable } from "@/components/tickets-table/data-table";
-import { getTickets } from "@/components/api/dashboardApi";
+import { getCustomers, getTickets } from "@/components/api/dashboardApi";
 import KPI from "@/components/kpi";
 import { useAtomValue, useSetAtom } from "jotai";
 import { customersAtom, ticketsAtom, usernameAtom } from "@/lib/atoms";
@@ -16,13 +16,24 @@ const Home = () => {
 
   const setCustomers = useSetAtom(customersAtom);
 
+  async function handleCustomers(){
+    try {
+      const response = await getCustomers();
+      console.log(response);
+      
+      setCustomers(response.data.customers);
+    } catch (error) {
+      
+    }
+  }
+
   async function handleTicketsFetch() {
     try {
       const response = await getTickets();
     
       setUsername(response.data.username);
       setTickets(response.data.ticketId);
-      setCustomers(response.data.all_customers);
+    
     } catch (error) {
       toast({
         title: "Tickets",
@@ -34,6 +45,7 @@ const Home = () => {
 
   useEffect(() => {
     handleTicketsFetch();
+    handleCustomers();
   }, []);
 
   return (
