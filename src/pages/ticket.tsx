@@ -57,6 +57,7 @@ import {
 } from "lucide-react";
 import TicketHeader from "@/components/ticket/ticket-header";
 
+
 const Ticket = () => {
   const { toast } = useToast();
   const { id } = useParams();
@@ -78,7 +79,7 @@ const Ticket = () => {
 
   async function handleFetchTicketDetails() {
     try {
-      const response = await getTicketDetails(id);
+      const response = await getTicketDetails(id!);
       console.log(response);
 
       setTicketDetails(response.data);
@@ -173,7 +174,7 @@ const Ticket = () => {
   const printPDF = async () => {
     const s = ticketDetails?.ticket_id.toString();
     try {
-      const response = await downloadTicket(ticketDetails?.ticket_id);
+      const response = await downloadTicket(s!);
       if (response.status === 200 && response.data instanceof ArrayBuffer) {
         const arrayBuffer = response.data;
         const blob = new Blob([arrayBuffer], { type: "application/pdf" });
@@ -199,8 +200,8 @@ const Ticket = () => {
 
   const handleFalsePositive = async (value: boolean) => {
     try {
-      if (value) {
-        const response = await markFalsePositive(ticketDetails?.ticket_id!);
+      if (value && ticketDetails) {
+        const response = await markFalsePositive(ticketDetails.ticket_id);
         console.log(response);
       }
     } catch (error) {

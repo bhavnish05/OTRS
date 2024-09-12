@@ -56,6 +56,7 @@ const Login = () => {
 
     try {
       const response = await loginAPI(values);
+      localStorage.setItem("username",values.username)
       setUsername(values.username);
       setId(response.data.uniqueId);
       setOtpValidate(true);
@@ -64,7 +65,7 @@ const Login = () => {
         title: "Authentication",
         description: "OTP has been sent.",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Authentication",
         description: "Something went wrong. Please try again later!",

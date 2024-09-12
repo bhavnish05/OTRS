@@ -173,7 +173,12 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
                       <Clock className="h-3 w-3" />
                       {value.insert_date}
                     </p>
-                    <TooltipProvider>
+
+                    {value.supporting_files.length>0 && value.supporting_files[0] ==="" ? (
+                      <p className="text-xs text-muted-foreground">no file present</p>
+                    ):(
+
+                      <TooltipProvider>
                       {value.supporting_files.map((file, index) => (
                         <Tooltip key={index}>
                           <TooltipTrigger asChild>
@@ -190,6 +195,8 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
                         </Tooltip>
                       ))}
                     </TooltipProvider>
+                    )}
+                 
                   </div>
                 </div>
               </div>

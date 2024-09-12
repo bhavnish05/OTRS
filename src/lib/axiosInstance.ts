@@ -1,4 +1,4 @@
-import { removeToken } from "@/components/api/authApi";
+import { refreshToken, removeToken, setToken } from "@/components/api/authApi";
 import axios from "axios";
 
 const axiosInstance = axios.create({
@@ -15,21 +15,38 @@ axiosInstance.interceptors.request.use(
   (error) => {
     return Promise.reject(error);
   }
-  
 );
 
 axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
-  (error) => {
+  async (error) => {
     if (!error.response) {
-
       window.location.href = new URL("/maintenance", window.origin).toString();
     } else {
       if (error.response.status === 401) {
-        removeToken();
-        window.location.href = new URL("/login", window.origin).toString();
+        try {
+          const rf = localStorage.getItem("rf_token");
+          const userName = localStorage.getItem("username");
+          if (rf && userName) {
+            const response = await refreshToken({ refreshToken: rf, userName });
+            console.log(response);
+
+            const newToken = response.data.proToken;
+            const newRfToken = response.data.refreshToken;
+
+            setToken(newToken, newRfToken);
+
+            error.config.headers["Authorization"] = `Bearer ${newToken}`;
+            return axiosInstance.request(error.config);
+          }
+
+      
+        } catch (error) {
+          removeToken();
+          window.location.href = new URL("/login", window.origin).toString();
+        }
       } else {
         console.error("API Error", error.response.data);
       }
@@ -40,3 +57,4 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
+

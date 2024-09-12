@@ -19,11 +19,16 @@ const Home = () => {
   async function handleCustomers(){
     try {
       const response = await getCustomers();
-      console.log(response);
+     
       
       setCustomers(response.data.customers);
     } catch (error) {
-      
+      toast({
+        title: "Tickets",
+        description: "Unable to fetch customers.",
+        variant: "destructive",
+      });
+
     }
   }
 

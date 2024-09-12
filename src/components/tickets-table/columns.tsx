@@ -50,14 +50,48 @@ export const columns: ColumnDef<Tickets>[] = [
   {
     accessorKey: "customer_name",
     header: "Customer Name",
+
+    cell: (data) => {
+      return (
+        <Link
+          to={`/ticket/${data.row.original.ticket_id}`}
+          className="flex gap-1 items-center group"
+        >
+          <p>{data.cell.getValue() as string}</p>
+          <ExternalLink className="h-3 w-3 hidden group-hover:block" />
+        </Link>
+      );
+    },
   },
   {
     accessorKey: "title",
     header: "Title",
+    cell: (data) => {
+      return (
+        <Link
+          to={`/ticket/${data.row.original.ticket_id}`}
+          className="flex gap-1 items-center group"
+        >
+          <p>{data.cell.getValue() as string}</p>
+          <ExternalLink className="h-3 w-3 hidden group-hover:block" />
+        </Link>
+      );
+    },
   },
   {
     accessorKey: "description",
     header: "Description",
+    cell: (data) => {
+      return (
+        <Link
+          to={`/ticket/${data.row.original.ticket_id}`}
+          className="flex gap-1 items-center group"
+        >
+          <p>{data.cell.getValue() as string}</p>
+          <ExternalLink className="h-3 w-3 hidden group-hover:block" />
+        </Link>
+      );
+    },
   },
   {
     accessorKey: "breach_status",
@@ -67,18 +101,18 @@ export const columns: ColumnDef<Tickets>[] = [
           className="text-xs flex gap-2 items-center cursor-pointer"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Breached/Not Breached
+          Breach Status
           <ArrowUpDown className="h-3 w-3" />
         </p>
       );
     },
-    cell: (data:any) => {
+    cell: (data) => {
 
       return (
         <p
-          className={data.cell.getValue() === "breached" ? "text-red-500" : "text-green-500"}
+          className={data.cell.getValue() as string === "breached" ? "text-red-500" : "text-green-500"}
         >
-          {data.cell.getValue()}
+          {data.cell.getValue() as string}
         </p>
       );
     },

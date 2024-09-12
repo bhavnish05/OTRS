@@ -46,16 +46,16 @@ const InputOTPForm: React.FC<InputOTPFormProps> = ({ userName, id }) => {
     try {
       const pin = parseInt(data.pin, 10);
       const response = await validate({ otp: pin, uniqueID: id, userName });
-      setToken(response.data.proToken);
+      setToken(response.data.proToken, response.data.refreshToken);
       toast({
         title: "Authentication",
         description: "Login successful",
       });
       navigate("/");
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Authentication",
-        description: error.response?.data.MESSAGE,
+        description: "Invalid OTP",
         variant: "destructive",
       });
     }
@@ -64,20 +64,16 @@ const InputOTPForm: React.FC<InputOTPFormProps> = ({ userName, id }) => {
   return (
     <div className="h-full flex justify-center items-center">
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-6"
-        >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="pin"
-            
             render={({ field }) => (
               <FormItem>
                 <FormLabel>One-Time Password</FormLabel>
                 <FormControl>
                   <InputOTP maxLength={6} {...field}>
-                    <InputOTPGroup >
+                    <InputOTPGroup>
                       <InputOTPSlot index={0} autoFocus />
                       <InputOTPSlot index={1} />
                       <InputOTPSlot index={2} />

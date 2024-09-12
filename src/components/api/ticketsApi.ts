@@ -16,7 +16,7 @@ export const closeTicket = async (id: string): Promise<AxiosResponse> => {
 };
 
 export const filterTickets = async (
-  ticketFilters: any
+  ticketFilters: string
 ): Promise<AxiosResponse> => {
   return axiosInstance.post("/filters", ticketFilters);
 };
@@ -83,7 +83,7 @@ export const updateDescription = async (
 };
 
 export const downloadTicket = async (
-  ticket_id: any
+  ticket_id: string
 ): Promise<AxiosResponse<ArrayBuffer>> => {
   return axiosInstance.get(`/export_ticket/${ticket_id}`, {
     responseType: "arraybuffer",

@@ -15,7 +15,7 @@ const KPI: React.FC<KPIProps> = ({ tickets }) => {
       const response = await getLoggedUsers();
       const loggedInUsers = response.data.logged_in_users;
       setLoggedInUsersCount(loggedInUsers);
-    } catch (error: any) {
+    } catch (error) {
       console.log(error);
     }
   }
