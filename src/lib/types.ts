@@ -6,6 +6,7 @@ export type OTPValidate = {
 
 export type Tickets = {
   ticket_id: number;
+  breach_status:string;
   customer_id: number;
   customer_name: string;
   type: string;
@@ -50,6 +51,7 @@ export type TicketDetails = {
     id: number;
     insert_date: string;
     resolution_by: number;
+    resolved_by:string;
     supporting_files: string[];
     ticket_id: number;
     title: string;

@@ -7,10 +7,7 @@ import { pickupTicket } from "../api/ticketsApi";
 import { ArrowUpDown, ExternalLink } from "lucide-react";
 import { Button } from "../ui/button";
 
-
 export const columns: ColumnDef<Tickets>[] = [
-
- 
   {
     accessorKey: "ticket_id",
     header: ({ column }) => {
@@ -38,17 +35,17 @@ export const columns: ColumnDef<Tickets>[] = [
   },
   {
     accessorKey: "customer_id",
-    header: ({column})=>{
-      return(
+    header: ({ column }) => {
+      return (
         <p
-        className="text-xs flex gap-2 items-center cursor-pointer"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Customer ID
-        <ArrowUpDown className="ml-1 h-3 w-3" />
-      </p>
-      )
-    }
+          className="text-xs flex gap-2 items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Customer ID
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </p>
+      );
+    },
   },
   {
     accessorKey: "customer_name",
@@ -63,46 +60,70 @@ export const columns: ColumnDef<Tickets>[] = [
     header: "Description",
   },
   {
-    accessorKey: "raised_at",
-    header: ({column})=>{
-      return(
+    accessorKey: "breach_status",
+    header: ({ column }) => {
+      return (
         <p
-        className="text-xs flex gap-2 items-center cursor-pointer"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Raised At
-        <ArrowUpDown className="ml-1 h-3 w-3" />
-      </p>
-      )
-    }
+          className="text-xs flex gap-2 items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Breached/Not Breached
+          <ArrowUpDown className="h-3 w-3" />
+        </p>
+      );
+    },
+    cell: (data:any) => {
+
+      return (
+        <p
+          className={data.cell.getValue() === "breached" ? "text-red-500" : "text-green-500"}
+        >
+          {data.cell.getValue()}
+        </p>
+      );
+    },
+  },
+  {
+    accessorKey: "raised_at",
+    header: ({ column }) => {
+      return (
+        <p
+          className="text-xs flex gap-2 items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Raised At
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </p>
+      );
+    },
   },
   {
     accessorKey: "sla_due",
-    header: ({column})=>{
-      return(
+    header: ({ column }) => {
+      return (
         <p
-        className="text-xs flex gap-2 items-center cursor-pointer"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        SLA Due
-        <ArrowUpDown className="ml-1 h-3 w-3" />
-      </p>
-      )
-    }
+          className="text-xs flex gap-2 items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          SLA Due
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </p>
+      );
+    },
   },
   {
     accessorKey: "status",
-    header: ({column})=>{
-      return(
+    header: ({ column }) => {
+      return (
         <p
-        className="text-xs flex gap-2 items-center cursor-pointer"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Status
-        <ArrowUpDown className="ml-1 h-3 w-3" />
-      </p>
-      )
-    }
+          className="text-xs flex gap-2 items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Status
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </p>
+      );
+    },
   },
   {
     accessorKey: "type",
@@ -110,64 +131,76 @@ export const columns: ColumnDef<Tickets>[] = [
   },
   {
     accessorKey: "severity",
-    header: ({column})=>{
-      return(
+    header: ({ column }) => {
+      return (
         <p
-        className="text-xs flex gap-2 items-center cursor-pointer"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-       Severity
-        <ArrowUpDown className="ml-1 h-3 w-3"/>
-      </p>
-      )
-    }
+          className="text-xs flex gap-2 items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Severity
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </p>
+      );
+    },
   },
   {
     accessorKey: "bucket",
-    header: ({column})=>{
-      return(
+    header: ({ column }) => {
+      return (
         <p
-        className="text-xs flex gap-2 items-center cursor-pointer"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Bucket
-        <ArrowUpDown className="ml-1 h-3 w-3" />
-      </p>
-      )
-    }
+          className="text-xs flex gap-2 items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Bucket
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </p>
+      );
+    },
   },
   {
     accessorKey: "canPick",
-    header: ({column}) =>{
-      return(
+    header: ({ column }) => {
+      return (
         <p
-        className="text-xs flex gap-2 items-center cursor-pointer"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-       
-        <ArrowUpDown className="ml-1 h-3 w-3" />
-      </p>
-      )
+          className="text-xs flex gap-2 items-center cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          <ArrowUpDown className="ml-1 h-3 w-3" />
+        </p>
+      );
     },
     cell: (data) => {
       const ticketId = data.row.original.ticket_id;
       const canPick = data.row.original.canPick;
+      const status = data.row.original.status;
+      
 
       return (
-        <Button
-          disabled={!canPick}
-          onClick={async () => {
-            try {
-              await pickupTicket(ticketId);
-              window.location.href = window.origin + `/ticket/${ticketId}`;
-            } catch (error) {
-              console.log(error);
-            }
-          }}
-        >
-          {canPick ? "Pick" : "Picked"}
-        </Button>
+  
+
+          status === "closed" ? (
+            <p>Ticket closed</p>
+
+          ):(
+
+            <Button
+            disabled={!canPick}
+            onClick={async () => {
+              try {
+                await pickupTicket(ticketId);
+                window.location.href = window.origin + `/ticket/${ticketId}`;
+              } catch (error) {
+                console.log(error);
+              }
+            }}
+          >
+            {canPick ? "Pick" : "Picked"}
+          </Button>
+
+          )
+        
       );
-    },
+
+          }
   },
 ];

@@ -135,7 +135,7 @@ const CreateNewTicket: React.FC<CreateNewTicketProps> = ({
         description: "Ticket created succesfully",
         variant: "default",
       });
-      history.go(0);
+     
 
     
     } catch (error) {

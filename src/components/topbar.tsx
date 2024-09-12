@@ -40,7 +40,7 @@ const TopBar = () => {
       </Link>
 
       <div className="flex gap-4">
-        <p className="p-2 text-xs border rounded-md">Hello, {username}</p>
+        <p className="p-3 text-xs border rounded-md">Hello, {username}</p>
 
         <div className="flex gap-4 items-center">
           <ModeToggle />

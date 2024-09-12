@@ -52,8 +52,8 @@ const TicketHeader: React.FC<TicketHeaderProps> = ({ ticketDetails }) => {
                 headerFields.map(
                   (field) =>
                     (ticketDetails as any)[field] !== undefined && (
-                      <span className="" key={field}>
-                        <p className="text-[9px] font-extrabold text-muted-foreground uppercase">
+                      <span className="" key={field} >
+                        <p className= "text-[9px] font-extrabold text-muted-foreground uppercase">
                           {field}
                         </p>
                         <p className="text-sm">
@@ -64,7 +64,7 @@ const TicketHeader: React.FC<TicketHeaderProps> = ({ ticketDetails }) => {
                 )}
             </div>
 
-            <div className="w-1/2 flex flex-col gap-2 items-center justify-center border-s">
+            <div className="w-1/2 flex flex-col gap-2 items-center justify-center border-s ">
               <div className="flex flex-col items-center">
                 <p className="text-muted-foreground font-bold text-[10px]">
                   RAISED AT
@@ -80,14 +80,19 @@ const TicketHeader: React.FC<TicketHeaderProps> = ({ ticketDetails }) => {
                   SLA DUE
                 </p>
 
-
-                {ticketDetails.username!== ticketDetails.bucket?(
+                {ticketDetails.username !== ticketDetails.bucket ? (
                   <p className="text-xl font-bold">00:00:00</p>
-                ):(
-                  <Countdown
-                  targetDate={ticketDetails.sla_due}
-                  countdown={new Date(ticketDetails.sla_due) > new Date()}
-                />
+                ) : (
+                  <>
+                    <Countdown
+                      targetDate={ticketDetails.sla_due}
+                      countdown={false}
+                    />
+                    <Countdown
+                      targetDate={ticketDetails.sla_due}
+                      countdown={new Date(ticketDetails.sla_due) > new Date()}
+                    />
+                  </>
                 )}
               </div>
             </div>

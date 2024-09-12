@@ -39,6 +39,13 @@ export const validate = async (data: OTPValidate) => {
   return axios.post("http://10.101.104.140:8090/validate_otp", data);
 };
 
+
+// export const refreshToken = async(data:{
+//   username:string
+// }) => {
+//   return axios.post("http://10.101.104.140:8090/refresh_token",)
+// }
+
 export const logout = async () => {
   return axios.post(
     "http://10.101.104.140:8090/logout",

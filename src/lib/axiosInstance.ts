@@ -15,6 +15,7 @@ axiosInstance.interceptors.request.use(
   (error) => {
     return Promise.reject(error);
   }
+  
 );
 
 axiosInstance.interceptors.response.use(
@@ -23,6 +24,7 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (!error.response) {
+
       window.location.href = new URL("/maintenance", window.origin).toString();
     } else {
       if (error.response.status === 401) {

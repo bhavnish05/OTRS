@@ -7,15 +7,7 @@ import {
   uploadDocument,
 } from "../api/ticketsApi";
 
-import {
-  Check,
- 
-  FileDown,
- 
-  Plus,
-  Upload,
-  XCircle,
-} from "lucide-react";
+import { Check, Clock, FileDown, Plus, Upload, XCircle } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useToast } from "../ui/use-toast";
@@ -89,7 +81,6 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
     try {
       const response = await uploadDocument(file);
 
-      
       startTransition(() => {
         setUploadedFiles((prevFiles) => [
           ...prevFiles,
@@ -112,7 +103,7 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
   };
 
   const handleSubmitResolution = async () => {
-    const jsonString = JSON.stringify(uploadedFiles);
+    // const jsonString = uploadedFiles);
 
     if (resolution.trim() === "") {
       toast({
@@ -124,7 +115,7 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
     }
     try {
       await submitResolution(
-        jsonString,
+        uploadedFiles,
         ticketDetails.ticket_id,
         "",
         resolution
@@ -163,7 +154,7 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
         <div className="flex flex-col gap-2">
           {ticketDetails?.resolutions.length !== 0 ? (
             ticketDetails?.resolutions.map((value, index) => (
-              <div className="flex gap-2 items-center">
+              <div key={index} className="flex gap-2 items-center">
                 <p className="text-muted-foreground text-xs text-right w-[20px]">
                   {index + 1}.
                 </p>
@@ -173,26 +164,32 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
                   key={index}
                 >
                   <p className="text-xs">{value.description}</p>
- 
 
-                  <div className="flex gap-1">
-                    {value.supporting_files.map((file, index) => (
-                      <TooltipProvider>
+                  <div className="flex gap-6">
+                    <p className=" flex items-center text-xs text-muted-foreground">
+                      {value.resolved_by}
+                    </p>
+                    <p className="flex items-center text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      {value.insert_date}
+                    </p>
+                    <TooltipProvider>
+                      {value.supporting_files.map((file, index) => (
                         <Tooltip key={index}>
                           <TooltipTrigger asChild>
                             <span
                               className="cursor-pointer border border-muted p-1 hover:bg-muted rounded-md"
                               onClick={() => handleDownloadDocument(file)}
                             >
-                              <FileDown className="h-3 w-3" />
+                              <FileDown className=" h-3 w-3" />
                             </span>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>{file}</p>
+                            <p>{file.split("_")[1]}</p>
                           </TooltipContent>
                         </Tooltip>
-                      </TooltipProvider>
-                    ))}
+                      ))}
+                    </TooltipProvider>
                   </div>
                 </div>
               </div>
@@ -223,10 +220,10 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
         />
 
         <div className="mt-2 flex flex-wrap gap-2">
-          {uploadedFiles.map((value, index) => (
+          {uploadedFiles.map((file, index) => (
             <div className="flex pr-1 mb-3" key={index}>
               <div className="relative group px-2 py-1 bg-primary rounded-md">
-                <p className="text-xs">{value}</p>
+                <p className="text-xs">{file.split("_")[1]}</p>
                 <XCircle
                   className="absolute -top-1.5 -right-1.5 h-4 w-4 hidden group-hover:block cursor-pointer"
                   onClick={() => handleDeleteRes(index)}

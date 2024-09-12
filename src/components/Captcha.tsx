@@ -1,5 +1,5 @@
 import { RefreshCw } from "lucide-react";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import { Input } from "./ui/input";
 
 interface CaptchaProps {
@@ -13,7 +13,7 @@ export const Captcha = ({ onCaptchaChange }: CaptchaProps) => {
     setCaptcha(generateCaptcha());
     onCaptchaChange("");
   };
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     onCaptchaChange(text, captcha);
   };

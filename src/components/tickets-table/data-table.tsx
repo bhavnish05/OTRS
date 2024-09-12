@@ -49,12 +49,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([
-    {
-      id: "ticket_id",
-      desc: true,
-    },
-  ]);
+  const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
@@ -83,8 +78,8 @@ export function DataTable<TData, TValue>({
 
   return (
     <>
-      <div className="flex gap-4 justify-start">
-        <div className="flex gap-2">
+      <div className="flex justify-between">
+        <div className="flex gap-4">
           <Select onValueChange={setSearchField}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Fields" />
@@ -101,7 +96,7 @@ export function DataTable<TData, TValue>({
           </Select>
 
           <Input
-            placeholder={`Search ${searchField}`}
+            placeholder={`Filter ${searchField}`}
             value={
               (table.getColumn(searchField)?.getFilterValue() as string) ?? ""
             }
@@ -111,55 +106,56 @@ export function DataTable<TData, TValue>({
             className="max-w-sm capitalize"
           />
           <CircleX
-            className="mt-2  mr-10 cursor-pointer"
+            className="mt-2 cursor-pointer"
             onClick={() => table.getColumn(searchField)?.setFilterValue("")}
           />
         </div>
 
-        <Button
-          className="flex items-center"
-          variant="outline"
-          onClick={() =>
-            setCreateNewTicketDialogState(!createNewTicketDialogState)
-          }
-        >
-          <p>Create </p>
-          <PlusCircle className="h-4 w-4" />
-        </Button>
+        <div className="flex gap-4">
+          <Button
+            className="flex gap-2 items-center"
+            variant="outline"
+            onClick={() =>
+              setCreateNewTicketDialogState(!createNewTicketDialogState)
+            }
+          >
+            <p>Create </p>
+            <PlusCircle className="h-4 w-4" />
+          </Button>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-4">
-              Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                );
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="ml-auto">
+                Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {table
+                .getAllColumns()
+                .filter((column) => column.getCanHide())
+                .map((column) => {
+                  return (
+                    <DropdownMenuCheckboxItem
+                      key={column.id}
+                      className="capitalize"
+                      checked={column.getIsVisible()}
+                      onCheckedChange={(value) =>
+                        column.toggleVisibility(!!value)
+                      }
+                    >
+                      {column.id}
+                    </DropdownMenuCheckboxItem>
+                  );
+                })}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        <Button
-          className=""
-          onClick={() => setFilterDialogState(!filterDialogState)}
-        >
-          Filter
-        </Button>
+          <Button onClick={() => setFilterDialogState(!filterDialogState)}>
+            Filter
+          </Button>
+
+
+        </div>
       </div>
 
       <div className="rounded-md border mt-4">

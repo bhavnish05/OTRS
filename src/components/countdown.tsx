@@ -37,7 +37,7 @@ const Countdown: React.FC<CountdownProps> = ({ targetDate, countdown }) => {
       }, 1000);
       return () => clearInterval(timerId);
     }
-  }, [countdown, targetDate]);
+  }, [countdown]);
 
   const formattedTargetDate = new Date(targetDate).toLocaleString();
 

@@ -142,7 +142,6 @@ const Ticket = () => {
         });
 
         history.go(0);
-
       } catch (error: any) {
         const statusCode = error?.response?.status;
         const message =
@@ -254,6 +253,7 @@ const Ticket = () => {
                   ticketDetails?.username !== ticketDetails?.bucket ||
                   ticketDetails?.status === "closed"
                 }
+                asChild
               >
                 <Button
                   disabled={

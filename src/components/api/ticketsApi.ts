@@ -1,7 +1,7 @@
 import { AxiosResponse } from "axios";
 import axiosInstance from "@/lib/axiosInstance";
 
-export const getTicketDetails = async (id: any): Promise<AxiosResponse> => {
+export const getTicketDetails = async (id: string): Promise<AxiosResponse> => {
   return axiosInstance.post(`/ticket_details/${id}`, {});
 };
 
@@ -22,8 +22,8 @@ export const filterTickets = async (
 };
 
 export const submitResolution = async (
-  files: any,
-  ticket_id: any,
+  files: string[],
+  ticket_id: number,
   title: string,
   description: string
 ) => {
@@ -85,12 +85,9 @@ export const updateDescription = async (
 export const downloadTicket = async (
   ticket_id: any
 ): Promise<AxiosResponse<ArrayBuffer>> => {
-  return axiosInstance.get(
-    `/export_ticket/${ticket_id}`,
-    {
-      responseType: "arraybuffer"
-    }
-  );
+  return axiosInstance.get(`/export_ticket/${ticket_id}`, {
+    responseType: "arraybuffer",
+  });
 };
 
 export const markFalsePositive = async (

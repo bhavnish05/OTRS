@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TicketDetails } from "@/lib/types";
 
-import {FileDown, Pencil, Save, X } from "lucide-react";
+import { FileDown, Pencil, Save, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import {
@@ -35,8 +35,12 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
   }
 
   const handleDownloadDocument = async (document_name: string) => {
+    console.log(document_name);
+
     try {
       const response = await downloadDocument(document_name);
+      console.log(response);
+
       if (response.status === 200 && response.data instanceof ArrayBuffer) {
         const arrayBuffer = response.data;
         const blob = new Blob([arrayBuffer], { type: "application/pdf" });
@@ -81,31 +85,35 @@ const DescriptionTab: React.FC<DescriptionTabProps> = ({
 
   return (
     <>
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-          {/* <BookOpenText className="h-4 w-4 text-muted-foreground" />
-          <p className="text-xs font-bold text-muted-foreground">Description</p> */}
+      <div className="flex-col items-center">
+        <div className="flex gap-3 mb-2 justify-end">
+          <p className="text-xs text-muted-foreground">Supporting files:</p>
+          {ticketDetails &&
+          ticketDetails?.file_paths.length > 0 &&
+          ticketDetails.file_paths[0] === "" ? (
+            <p className="text-xs text-muted-foreground">No files present</p>
+          ) : (
+            ticketDetails?.file_paths.map((file, index) => (
+              <TooltipProvider key={index}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span
+                      className="cursor-pointer border border-muted pb-1 hover:bg-muted rounded-md"
+                      onClick={() => handleDownloadDocument(file)}
+                    >
+                      <FileDown className="h-4 w-4" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{file.split("_")[1]}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ))
+          )}
         </div>
-
-        {ticketDetails &&
-          ticketDetails.file_paths.map((file, index) => (
-            <TooltipProvider>
-              <Tooltip key={index}>
-                <TooltipTrigger asChild>
-                  <span
-                    className="cursor-pointer border border-muted pb-1 hover:bg-muted rounded-md "
-                    onClick={() => handleDownloadDocument(file)}
-                  >
-                    <FileDown className="h-4 w-4" />
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{file}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ))}
       </div>
+
       <div className="mb-2 flex flex-col gap-2 items-end">
         {edit ? (
           <Textarea

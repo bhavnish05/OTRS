@@ -30,6 +30,8 @@ const Home = () => {
   async function handleTicketsFetch() {
     try {
       const response = await getTickets();
+      console.log(response);
+      
     
       setUsername(response.data.username);
       setTickets(response.data.ticketId);
