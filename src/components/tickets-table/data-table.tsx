@@ -81,6 +81,7 @@ export function DataTable<TData, TValue>({
       <div className="flex justify-between">
         <div className="flex gap-4">
           <Select onValueChange={setSearchField}>
+            
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Fields" />
             </SelectTrigger>
@@ -89,22 +90,30 @@ export function DataTable<TData, TValue>({
                 return (
                   <SelectItem key={column.id} value={column.id}>
                     {column.id}
+                   
                   </SelectItem>
                 );
               })}
+              
             </SelectContent>
           </Select>
 
           <Input
             placeholder={`Filter ${searchField}`}
+
             value={
               (table.getColumn(searchField)?.getFilterValue() as string) ?? ""
+              
             }
             onChange={(event) =>
               table.getColumn(searchField)?.setFilterValue(event.target.value)
+             
+              
             }
+            
             className="max-w-sm capitalize"
           />
+          
           <CircleX
             className="mt-2 cursor-pointer"
             onClick={() => table.getColumn(searchField)?.setFilterValue("")}

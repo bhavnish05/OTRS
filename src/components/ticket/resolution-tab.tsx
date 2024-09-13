@@ -241,7 +241,10 @@ const ResolutionTab: React.FC<ResolutionTabProps> = ({
         </div>
 
         <div className="flex gap-2 mb-2">
-          <Input id="file" type="file" onChange={handleFileChange} />
+          <Input id="file" type="file" onChange={handleFileChange}           disabled={
+              ticketDetails?.username != ticketDetails?.bucket ||
+              ticketDetails?.status === "closed"
+            }/>
           <Button
             disabled={
               ticketDetails?.username != ticketDetails?.bucket ||

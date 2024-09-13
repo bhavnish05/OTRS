@@ -57,7 +57,6 @@ import {
 } from "lucide-react";
 import TicketHeader from "@/components/ticket/ticket-header";
 
-
 const Ticket = () => {
   const { toast } = useToast();
   const { id } = useParams();
@@ -77,10 +76,16 @@ const Ticket = () => {
   const [assignToUser, setAssignToUser] = useState<string>("");
   const [closeTicketDialog, setCloseTicketDialog] = useState<boolean>(false);
 
+  const [isFalsePositive, setIsFalsePositive] = useState(
+    ticketDetails?.isFalse || false
+  );
+
   async function handleFetchTicketDetails() {
     try {
       const response = await getTicketDetails(id!);
       console.log(response);
+
+      setIsFalsePositive(response.data.isFalse);
 
       setTicketDetails(response.data);
     } catch (error) {
@@ -202,6 +207,8 @@ const Ticket = () => {
     try {
       if (value && ticketDetails) {
         const response = await markFalsePositive(ticketDetails.ticket_id);
+
+        setIsFalsePositive(value);
         console.log(response);
       }
     } catch (error) {
@@ -242,7 +249,11 @@ const Ticket = () => {
               <p className="text-[10px] font-semibold text-muted-foreground">
                 Mark as false positive
               </p>
-              <Switch onCheckedChange={handleFalsePositive} />
+              <Switch
+                checked={isFalsePositive}
+                onCheckedChange={handleFalsePositive}
+              
+              />
             </div>
             <Button className="" onClick={printPDF}>
               <Printer className="h-4 w-4" />
